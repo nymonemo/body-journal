@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -25,377 +26,383 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    const FIELDS = [
-      { key: "chest",  label: "รอบอก",     icon: "❤️", color: "#e57373" },
-      { key: "waist",  label: "รอบเอว",    icon: "⚡", color: "#ffb74d" },
-      { key: "hip",    label: "รอบสะโพก",  icon: "✨", color: "#f06292" },
-      { key: "armL",   label: "แขนซ้าย",   icon: "💪", color: "#81c784" },
-      { key: "armR",   label: "แขนขวา",    icon: "💪", color: "#a5d6a7" },
-      { key: "thighL", label: "ต้นขาซ้าย", icon: "🦵", color: "#64b5f6" },
-      { key: "thighR", label: "ต้นขาขวา",  icon: "🦵", color: "#4fc3f7" },
-    ];
+```
+const FIELDS = [
+  { key: "chest",  label: "รอบอก",     icon: "❤️", color: "#e57373" },
+  { key: "waist",  label: "รอบเอว",    icon: "⚡", color: "#ffb74d" },
+  { key: "hip",    label: "รอบสะโพก",  icon: "✨", color: "#f06292" },
+  { key: "armL",   label: "แขนซ้าย",   icon: "💪", color: "#81c784" },
+  { key: "armR",   label: "แขนขวา",    icon: "💪", color: "#a5d6a7" },
+  { key: "thighL", label: "ต้นขาซ้าย", icon: "🦵", color: "#64b5f6" },
+  { key: "thighR", label: "ต้นขาขวา",  icon: "🦵", color: "#4fc3f7" },
+];
 
-    const KEY = "body-journal-records";
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxk2mMwFfXogbhse1WJQITsR0KS_c6DuIYpSPgT5x588nCYh-qRD5BvCCJrYXsid8V7/exec";
-    const toCm = v => +(v * 2.54).toFixed(1);
+const KEY = "body-journal-records";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxk2mMwFfXogbhse1WJQITsR0KS_c6DuIYpSPgT5x588nCYh-qRD5BvCCJrYXsid8V7/exec";
+const toCm = v => +(v * 2.54).toFixed(1);
 
-    function todayStr() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    }
-    function fmtTH(s) {
-      return new Date(s+"T00:00:00").toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});
-    }
-    function load() {
-      try { const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); } catch(_){}
-      return [];
-    }
-    function save(r) {
-      try { localStorage.setItem(KEY, JSON.stringify(r)); } catch(_){}
-    }
-    async function syncToSheet(records) {
-      return new Promise((resolve) => {
-        try {
-          const cbName = "cb_" + Date.now();
-          window[cbName] = function(res) {
-            delete window[cbName];
-            document.getElementById(cbName)?.remove();
-            resolve(res);
-          };
-          const url = SHEET_URL
-            + "?callback=" + cbName
-            + "&action=save"
-            + "&data=" + encodeURIComponent(JSON.stringify(records));
-          const s = document.createElement("script");
-          s.id = cbName;
-          s.src = url;
-          s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
-          document.head.appendChild(s);
-        } catch(_) { resolve(null); }
-      });
-    }
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function fmtTH(s) {
+  if (!s) return "";
+  const [y, m, d] = s.slice(0,10).split("-").map(Number);
+  const date = new Date(y, m-1, d);
+  return date.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});
+}
+function load() {
+  try { const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); } catch(_){}
+  return [];
+}
+function save(r) {
+  try { localStorage.setItem(KEY, JSON.stringify(r)); } catch(_){}
+}
+async function syncToSheet(records) {
+  return new Promise((resolve) => {
+    try {
+      const cbName = "cb_" + Date.now();
+      window[cbName] = function(res) {
+        delete window[cbName];
+        document.getElementById(cbName)?.remove();
+        resolve(res);
+      };
+      const url = SHEET_URL
+        + "?callback=" + cbName
+        + "&action=save"
+        + "&data=" + encodeURIComponent(JSON.stringify(records));
+      const s = document.createElement("script");
+      s.id = cbName;
+      s.src = url;
+      s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
+      document.head.appendChild(s);
+    } catch(_) { resolve(null); }
+  });
+}
 
-    async function loadFromSheet() {
-      return new Promise((resolve) => {
-        try {
-          const cbName = "cb_" + Date.now();
-          window[cbName] = function(data) {
-            delete window[cbName];
-            document.getElementById(cbName)?.remove();
-            if (Array.isArray(data) && data.length > 0) {
-              const parsed = data.map(r => ({
-                id: r.id || Date.now() + Math.random(),
-                date: (String(r.date||"")).slice(0,10),
-                note: r.note||"",
-                ...Object.fromEntries(FIELDS.map(f=>[f.key, r[f.key]!=null&&r[f.key]!==""?parseFloat(r[f.key]):null]))
-              })).filter(r => r.date && r.date.length === 10);
-              resolve(parsed);
-            } else {
-              resolve(null);
-            }
-          };
-          const url = SHEET_URL + "?callback=" + cbName + "&action=load";
-          const s = document.createElement("script");
-          s.id = cbName;
-          s.src = url;
-          s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
-          document.head.appendChild(s);
-        } catch(_) { resolve(null); }
-      });
-    }
-
-    const TIPS = {
-      chest: `❤️ รอบอก\n\n🏋️ ท่าออกกำลังกาย\n• Push-up 3 เซต x 15 ครั้ง เน้นหน้าอกล่าง\n• Dumbbell Chest Press นอนราบ 3 เซต x 12 ครั้ง\n• Cable Chest Fly หรือ Pec Deck 3 เซต x 15 ครั้ง\n• Decline Push-up เพื่อเน้นหน้าอกบน 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแป้งขัดขาวและน้ำตาล แทนด้วยข้าวกล้อง ขนมปังโฮลวีต\n• โปรตีนทุกมื้อ เช่น ไข่ขาว อกไก่ ปลา เต้าหู้\n• หลีกเลี่ยงอาหารทอดและไขมันทรานส์\n\n💡 เพิ่มเติม\n• Cardio 30-45 นาที 4-5 วัน/สัปดาห์ เช่น วิ่ง ว่ายน้ำ`,
-      waist: `⚡ รอบเอว\n\n🏋️ ท่าออกกำลังกาย\n• Plank ค้างไว้ 30-60 วินาที x 4 เซต\n• Side Plank ซ้าย-ขวา ข้างละ 30 วินาที x 3 เซต\n• Bicycle Crunch 3 เซต x 20 ครั้ง (ช้าๆ เน้น squeeze)\n• Russian Twist ใช้น้ำหนัก 3 เซต x 20 ครั้ง\n• Dead Bug 3 เซต x 10 ครั้ง/ข้าง\n• Mountain Climber 3 เซต x 30 วินาที\n\n🥗 การกิน\n• ลดโซเดียม (ของหมักดอง ซอสปรุงรส ขนมกรุบกรอบ)\n• งดเครื่องดื่มที่มีน้ำตาลและแอลกอฮอล์\n• กินผักและใยอาหารมากขึ้น\n\n💡 เพิ่มเติม\n• นอนหลับ 7-8 ชม./คืน ลด cortisol\n• HIIT 20-30 นาที 3 วัน/สัปดาห์`,
-      hip: `✨ รอบสะโพก\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat 4 เซต x 15 ครั้ง เน้นต้นขาด้านใน\n• Hip Thrust ใช้บาร์เบลหรือดัมเบล 4 เซต x 12 ครั้ง\n• Side-lying Leg Raise 3 เซต x 20 ครั้ง/ข้าง\n• Clamshell with Resistance Band 3 เซต x 15 ครั้ง/ข้าง\n• Donkey Kick 3 เซต x 15 ครั้ง/ข้าง\n\n🥗 การกิน\n• ลดอาหารไขมันสูงและอาหารแปรรูป\n• เพิ่มโปรตีนเพื่อสร้างกล้ามเนื้อและกระชับ\n• ผักใบเขียวทุกมื้อ\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง 30 นาที\n• เดินขึ้นบันไดแทนลิฟต์ทุกวัน`,
-      armL: `💪 แขนซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง (เน้นด้านหลังแขน)\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n• Hammer Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n• ลดของหวานและน้ำตาลทุกชนิด\n\n💡 เพิ่มเติม\n• ว่ายน้ำท่า Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Boxing หรือ Shadow Boxing ช่วยกระชับแขนเร็วมาก`,
-      armR: `💪 แขนขวา\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง (เน้นด้านหลังแขน)\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n• Hammer Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n• ลดของหวานและน้ำตาลทุกชนิด\n\n💡 เพิ่มเติม\n• ว่ายน้ำท่า Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Boxing หรือ Shadow Boxing ช่วยกระชับแขนเร็วมาก`,
-      thighL: `🦵 ต้นขาซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze นอนหนีบลูกบอล 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Leg Press เท้าชิดกัน 3 เซต x 15 ครั้ง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน ลดการกักเก็บน้ำ\n• ลดเกลือและอาหารโซเดียมสูง\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง\n• วิ่งหรือเดินเร็วขึ้นเขา/บันได`,
-      thighR: `🦵 ต้นขาขวา\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze นอนหนีบลูกบอล 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Leg Press เท้าชิดกัน 3 เซต x 15 ครั้ง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน ลดการกักเก็บน้ำ\n• ลดเกลือและอาหารโซเดียมสูง\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง\n• วิ่งหรือเดินเร็วขึ้นเขา/บันได`,
-    };
-
-    function App() {
-      const [records, setRecords] = useState(() => load());
-      const [form, setForm]       = useState({});
-      const [note, setNote]       = useState("");
-      const [selDate, setSelDate] = useState(todayStr());
-      const [view, setView]       = useState("add");
-      const [selField, setSelField] = useState("waist");
-      const [summaryRec, setSummaryRec] = useState(null);
-      const [advice, setAdvice]   = useState(null);
-      const [advLoading, setAdvLoading] = useState(false);
-      const [importText, setImportText] = useState("");
-      const [importErr, setImportErr]   = useState("");
-      const [importOk, setImportOk]     = useState(false);
-      const [showImport, setShowImport] = useState(false);
-      const [copied, setCopied]   = useState(false);
-      const [syncing, setSyncing] = useState(false);
-      const [syncStatus, setSyncStatus] = useState("");
-
-      // โหลดข้อมูลจาก Google Sheets ตอนเปิดแอพ
-      useEffect(() => {
-        async function init() {
-          setSyncing(true);
-          setSyncStatus("🔄 กำลังโหลดจาก Google Sheets...");
-          const sheetData = await loadFromSheet();
-          if (sheetData && sheetData.length > 0) {
-            const sorted = [...sheetData].sort((a,b)=>b.date.localeCompare(a.date));
-            setRecords(sorted);
-            save(sorted);
-            setSyncStatus("✅ โหลดข้อมูลสำเร็จ");
-          } else {
-            setSyncStatus("📱 ใช้ข้อมูลในเครื่อง");
-          }
-          setSyncing(false);
-          setTimeout(() => setSyncStatus(""), 3000);
+async function loadFromSheet() {
+  return new Promise((resolve) => {
+    try {
+      const cbName = "cb_" + Date.now();
+      window[cbName] = function(data) {
+        delete window[cbName];
+        document.getElementById(cbName)?.remove();
+        if (Array.isArray(data) && data.length > 0) {
+          const parsed = data.map(r => ({
+            id: r.id || Date.now() + Math.random(),
+            date: (String(r.date||"")).slice(0,10),
+            note: r.note||"",
+            ...Object.fromEntries(FIELDS.map(f=>[f.key, r[f.key]!=null&&r[f.key]!==""?parseFloat(r[f.key]):null]))
+          })).filter(r => r.date && r.date.length === 10);
+          resolve(parsed);
+        } else {
+          resolve(null);
         }
-        init();
-      }, []);
+      };
+      const url = SHEET_URL + "?callback=" + cbName + "&action=load";
+      const s = document.createElement("script");
+      s.id = cbName;
+      s.src = url;
+      s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
+      document.head.appendChild(s);
+    } catch(_) { resolve(null); }
+  });
+}
 
-      function saveRecs(r) {
-        const s = [...r].sort((a,b)=>b.date.localeCompare(a.date));
-        setRecords(s);
-        save(s);
-        // sync ไป Google Sheets ด้วย
-        setSyncStatus("🔄 กำลัง sync...");
-        syncToSheet(s).then(() => {
-          setSyncStatus("✅ Sync สำเร็จ");
-          setTimeout(() => setSyncStatus(""), 2500);
-        });
+const TIPS = {
+  chest: `❤️ รอบอก\n\n🏋️ ท่าออกกำลังกาย\n• Push-up 3 เซต x 15 ครั้ง เน้นหน้าอกล่าง\n• Dumbbell Chest Press นอนราบ 3 เซต x 12 ครั้ง\n• Cable Chest Fly หรือ Pec Deck 3 เซต x 15 ครั้ง\n• Decline Push-up เพื่อเน้นหน้าอกบน 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแป้งขัดขาวและน้ำตาล แทนด้วยข้าวกล้อง ขนมปังโฮลวีต\n• โปรตีนทุกมื้อ เช่น ไข่ขาว อกไก่ ปลา เต้าหู้\n• หลีกเลี่ยงอาหารทอดและไขมันทรานส์\n\n💡 เพิ่มเติม\n• Cardio 30-45 นาที 4-5 วัน/สัปดาห์ เช่น วิ่ง ว่ายน้ำ`,
+  waist: `⚡ รอบเอว\n\n🏋️ ท่าออกกำลังกาย\n• Plank ค้างไว้ 30-60 วินาที x 4 เซต\n• Side Plank ซ้าย-ขวา ข้างละ 30 วินาที x 3 เซต\n• Bicycle Crunch 3 เซต x 20 ครั้ง (ช้าๆ เน้น squeeze)\n• Russian Twist ใช้น้ำหนัก 3 เซต x 20 ครั้ง\n• Dead Bug 3 เซต x 10 ครั้ง/ข้าง\n• Mountain Climber 3 เซต x 30 วินาที\n\n🥗 การกิน\n• ลดโซเดียม (ของหมักดอง ซอสปรุงรส ขนมกรุบกรอบ)\n• งดเครื่องดื่มที่มีน้ำตาลและแอลกอฮอล์\n• กินผักและใยอาหารมากขึ้น\n\n💡 เพิ่มเติม\n• นอนหลับ 7-8 ชม./คืน ลด cortisol\n• HIIT 20-30 นาที 3 วัน/สัปดาห์`,
+  hip: `✨ รอบสะโพก\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat 4 เซต x 15 ครั้ง เน้นต้นขาด้านใน\n• Hip Thrust ใช้บาร์เบลหรือดัมเบล 4 เซต x 12 ครั้ง\n• Side-lying Leg Raise 3 เซต x 20 ครั้ง/ข้าง\n• Clamshell with Resistance Band 3 เซต x 15 ครั้ง/ข้าง\n• Donkey Kick 3 เซต x 15 ครั้ง/ข้าง\n\n🥗 การกิน\n• ลดอาหารไขมันสูงและอาหารแปรรูป\n• เพิ่มโปรตีนเพื่อสร้างกล้ามเนื้อและกระชับ\n• ผักใบเขียวทุกมื้อ\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง 30 นาที\n• เดินขึ้นบันไดแทนลิฟต์ทุกวัน`,
+  armL: `💪 แขนซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง (เน้นด้านหลังแขน)\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n• Hammer Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n• ลดของหวานและน้ำตาลทุกชนิด\n\n💡 เพิ่มเติม\n• ว่ายน้ำท่า Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Boxing หรือ Shadow Boxing ช่วยกระชับแขนเร็วมาก`,
+  armR: `💪 แขนขวา\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง (เน้นด้านหลังแขน)\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n• Hammer Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n• ลดของหวานและน้ำตาลทุกชนิด\n\n💡 เพิ่มเติม\n• ว่ายน้ำท่า Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Boxing หรือ Shadow Boxing ช่วยกระชับแขนเร็วมาก`,
+  thighL: `🦵 ต้นขาซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze นอนหนีบลูกบอล 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Leg Press เท้าชิดกัน 3 เซต x 15 ครั้ง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน ลดการกักเก็บน้ำ\n• ลดเกลือและอาหารโซเดียมสูง\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง\n• วิ่งหรือเดินเร็วขึ้นเขา/บันได`,
+  thighR: `🦵 ต้นขาขวา\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze นอนหนีบลูกบอล 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Leg Press เท้าชิดกัน 3 เซต x 15 ครั้ง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน ลดการกักเก็บน้ำ\n• ลดเกลือและอาหารโซเดียมสูง\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike ระดับแรงต้านสูง\n• วิ่งหรือเดินเร็วขึ้นเขา/บันได`,
+};
+
+function App() {
+  const [records, setRecords] = useState(() => load());
+  const [form, setForm]       = useState({});
+  const [note, setNote]       = useState("");
+  const [selDate, setSelDate] = useState(todayStr());
+  const [view, setView]       = useState("add");
+  const [selField, setSelField] = useState("waist");
+  const [summaryRec, setSummaryRec] = useState(null);
+  const [advice, setAdvice]   = useState(null);
+  const [advLoading, setAdvLoading] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importErr, setImportErr]   = useState("");
+  const [importOk, setImportOk]     = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [copied, setCopied]   = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState("");
+
+  // โหลดข้อมูลจาก Google Sheets ตอนเปิดแอพ
+  useEffect(() => {
+    async function init() {
+      setSyncing(true);
+      setSyncStatus("🔄 กำลังโหลดจาก Google Sheets...");
+      const sheetData = await loadFromSheet();
+      if (sheetData && sheetData.length > 0) {
+        const sorted = [...sheetData].sort((a,b)=>b.date.localeCompare(a.date));
+        setRecords(sorted);
+        save(sorted);
+        setSyncStatus("✅ โหลดข้อมูลสำเร็จ");
+      } else {
+        setSyncStatus("📱 ใช้ข้อมูลในเครื่อง");
       }
-
-      function handleAdd() {
-        if (!FIELDS.some(f=>form[f.key])) return;
-        const e = { id:Date.now(), date:selDate, note,
-          ...Object.fromEntries(FIELDS.map(f=>[f.key, form[f.key]?parseFloat(form[f.key]):null])) };
-        saveRecs([...records, e]);
-        setForm({}); setNote(""); setSummaryRec(e); setView("summary");
-      }
-
-      function handleCopy() {
-        const j = JSON.stringify(records, null, 2);
-        navigator.clipboard.writeText(j).catch(()=>{
-          const t=document.createElement("textarea"); t.value=j;
-          document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t);
-        });
-        setCopied(true); setTimeout(()=>setCopied(false), 2500);
-      }
-
-      function handleImport() {
-        setImportErr("");
-        try {
-          const data = JSON.parse(importText);
-          if (!Array.isArray(data)) throw new Error();
-          const cleaned = data.map(r=>({
-            id: r.id||Date.now()+Math.random(),
-            date: (r.date||todayStr()).slice(0,10), note:r.note||"",
-            ...Object.fromEntries(FIELDS.map(f=>[f.key,r[f.key]!=null?parseFloat(r[f.key]):null]))
-          }));
-          const ids = new Set(records.map(r=>r.id));
-          saveRecs([...records, ...cleaned.filter(r=>!ids.has(r.id))]);
-          setImportText(""); setShowImport(false); setImportOk(true);
-          setTimeout(()=>setImportOk(false), 3000);
-        } catch(_) { setImportErr("JSON ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง"); }
-      }
-
-      function getAdvice() {
-        const latest=records[0], prev=records[1];
-        if (!latest||!prev) return;
-        const inc = FIELDS.filter(f=>prev[f.key]!=null&&latest[f.key]!=null&&latest[f.key]>prev[f.key]);
-        if (!inc.length) { setAdvice("🎉 ดีมาก! ไม่มีค่าใดเพิ่มขึ้นเลย ทำต่อไปเรื่อยๆ นะ"); return; }
-        setAdvLoading(true); setAdvice(null);
-        setTimeout(()=>{
-          setAdvice(inc.map(f=>TIPS[f.key]||f.label).join("\n\n"));
-          setAdvLoading(false);
-        }, 500);
-      }
-
-      const latest   = records[0]||null;
-      const previous = records[1]||null;
-      const first    = records.length>1?records[records.length-1]:null;
-      const cData    = records.filter(r=>r[selField]!=null).slice(0,10).reverse();
-      const cMax     = cData.length?Math.max(...cData.map(r=>r[selField]))+2:30;
-      const cMin     = cData.length?Math.max(0,Math.min(...cData.map(r=>r[selField]))-2):0;
-      const fInfo    = FIELDS.find(f=>f.key===selField)||FIELDS[0];
-
-      const bg  = "linear-gradient(135deg,#0f0f1a,#1a1025,#0d1a2e)";
-      const btnS = active => ({ flex:1, padding:"9px 0", border:"none", borderRadius:9, cursor:"pointer", fontSize:12, fontFamily:"inherit", fontWeight:active?700:400, background:active?"linear-gradient(135deg,#7c5cbf,#4a9ad4)":"transparent", color:active?"#fff":"#7a6fb0" });
-      const cardS = { background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:14, padding:"14px 16px", marginBottom:10 };
-
-      function DiffBadge({val,base}) {
-        if (val==null||base==null) return null;
-        const d=+(val-base).toFixed(2), dn=d<0, z=d===0;
-        return <div style={{fontSize:11,fontWeight:700,padding:"3px 7px",borderRadius:7,whiteSpace:"nowrap",color:z?"#7a6fb0":dn?"#81c784":"#e57373",background:z?"rgba(122,111,176,0.1)":dn?"rgba(129,199,132,0.12)":"rgba(229,115,115,0.12)"}}>{z?"—":dn?"▼ ":"▲ "}{z?"ไม่เปลี่ยน":`${Math.abs(d)}" / ${Math.abs(toCm(d))} ซม.`}</div>;
-      }
-
-      function CmpSec({title,recA,recB,labelA,labelB}) {
-        if (!recA||!recB) return null;
-        return <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:16,marginBottom:14}}>
-          <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>{title}</div>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
-            <div style={{textAlign:"center",flex:1}}><div style={{fontSize:10,color:"#6b5fa0"}}>{labelA}</div><div style={{fontSize:12,fontWeight:700,color:"#c8b8ff"}}>{fmtTH(recA.date)}</div></div>
-            <div style={{display:"flex",alignItems:"center",color:"#4a4a7a"}}>→</div>
-            <div style={{textAlign:"center",flex:1}}><div style={{fontSize:10,color:"#6b5fa0"}}>{labelB}</div><div style={{fontSize:12,fontWeight:700,color:"#c8b8ff"}}>{fmtTH(recB.date)}</div></div>
-          </div>
-          {FIELDS.map(f=>{
-            const vA=recA[f.key],vB=recB[f.key];
-            if(vA==null&&vB==null) return null;
-            return <div key={f.key} style={{display:"flex",alignItems:"center",padding:"8px 10px",marginBottom:5,background:"rgba(0,0,0,0.2)",borderRadius:10,gap:6}}>
-              <span style={{fontSize:14,width:20}}>{f.icon}</span>
-              <div style={{fontSize:12,color:"#c0b8e8",flex:1}}>{f.label}</div>
-              <div style={{fontSize:12,color:"#7a6fb0"}}>{vA!=null?`${vA}"`:"—"}</div>
-              <div style={{color:"#4a4a7a",fontSize:11}}>→</div>
-              <div style={{fontSize:12,color:f.color,fontWeight:700}}>{vB!=null?`${vB}"`:"—"}</div>
-              <DiffBadge val={vB} base={vA}/>
-            </div>;
-          })}
-        </div>;
-      }
-
-      return <div style={{minHeight:"100vh",background:bg,fontFamily:"'Sarabun','Noto Sans Thai',sans-serif",color:"#f0eeff",maxWidth:430,margin:"0 auto"}}>
-        <div style={{position:"fixed",top:-80,right:-80,width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,rgba(138,43,226,0.15),transparent 70%)",pointerEvents:"none"}}/>
-
-        {/* Header */}
-        <div style={{padding:"28px 24px 16px"}}>
-          <div style={{fontSize:11,letterSpacing:3,color:"#9c8fd4",textTransform:"uppercase",marginBottom:4}}>Body Journal</div>
-          <h1 style={{fontSize:26,fontWeight:700,margin:0,background:"linear-gradient(90deg,#c8b8ff,#81d4fa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>สัดส่วนร่างกาย</h1>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
-            <div style={{fontSize:12,color:"#6b5fa0"}}>{records.length>0?`บันทึกแล้ว ${records.length} ครั้ง`:"ยังไม่มีข้อมูล"}</div>
-            {syncStatus && <div style={{fontSize:11,color: syncStatus.startsWith("✅")?"#81c784":syncStatus.startsWith("🔄")?"#9c8fd4":"#7a6fb0"}}>{syncStatus}</div>}
-          </div>
-        </div>
-
-        {/* Nav */}
-        <div style={{display:"flex",margin:"0 24px 20px",background:"rgba(255,255,255,0.05)",borderRadius:12,padding:4,gap:2}}>
-          {[{k:"add",l:"บันทึก"},{k:"compare",l:"เทียบ"},{k:"history",l:"ประวัติ"},{k:"chart",l:"กราฟ"}].map(t=>
-            <button key={t.k} onClick={()=>setView(t.k)} style={btnS(view===t.k)}>{t.l}</button>
-          )}
-        </div>
-
-        {/* ADD */}
-        {view==="add" && <div style={{padding:"0 24px 100px"}}>
-          <div style={{...cardS,display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>📅</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:11,color:"#9c8fd4",marginBottom:2}}>วันที่บันทึก</div>
-              <input type="date" value={selDate} onChange={e=>setSelDate(e.target.value)} style={{background:"transparent",border:"none",outline:"none",color:"#c8b8ff",fontSize:15,fontWeight:600,fontFamily:"inherit",width:"100%",colorScheme:"dark"}}/>
-            </div>
-          </div>
-          <div style={{fontSize:11,color:"#7a6fb0",margin:"4px 0 10px"}}>กรอกค่าเป็นนิ้ว — แปลงเป็น ซม. ให้อัตโนมัติ</div>
-          {FIELDS.map(f=><div key={f.key} style={{...cardS,display:"flex",alignItems:"center",gap:12}}>
-            <span style={{fontSize:20}}>{f.icon}</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:12,color:"#9c8fd4",marginBottom:4}}>{f.label}</div>
-              <input type="number" placeholder="นิ้ว" value={form[f.key]||""} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} style={{background:"transparent",border:"none",outline:"none",color:"#f0eeff",fontSize:22,fontWeight:600,fontFamily:"inherit",width:"100%"}}/>
-            </div>
-            {form[f.key]&&<div style={{textAlign:"right"}}><div style={{fontSize:14,fontWeight:700,color:f.color}}>{form[f.key]}"</div><div style={{fontSize:11,color:"#7a6fb0"}}>{toCm(parseFloat(form[f.key]))} ซม.</div></div>}
-          </div>)}
-          <textarea placeholder="โน้ตเพิ่มเติม" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"14px 16px",color:"#c0b8e8",fontSize:14,fontFamily:"inherit",resize:"none",outline:"none",boxSizing:"border-box",marginBottom:16}}/>
-          <button onClick={handleAdd} style={{width:"100%",padding:16,border:"none",borderRadius:14,cursor:"pointer",background:"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:"#fff",fontSize:16,fontWeight:700,fontFamily:"inherit",boxShadow:"0 8px 24px rgba(124,92,191,0.4)"}}>บันทึก & ดูสรุป</button>
-        </div>}
-
-        {/* SUMMARY */}
-        {view==="summary"&&summaryRec&&<div style={{padding:"0 24px 100px"}}>
-          <div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.2),rgba(74,154,212,0.15))",border:"1px solid rgba(200,184,255,0.2)",borderRadius:20,padding:20,marginBottom:16}}>
-            <div style={{fontSize:11,color:"#9c8fd4",letterSpacing:2,marginBottom:4}}>สรุปการบันทึก</div>
-            <div style={{fontSize:18,fontWeight:700,color:"#c8b8ff",marginBottom:14}}>📅 {fmtTH(summaryRec.date)}</div>
-            {FIELDS.filter(f=>summaryRec[f.key]!=null).map(f=><div key={f.key} style={{background:"rgba(0,0,0,0.2)",borderRadius:12,padding:"10px 14px",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}><span>{f.icon}</span><span style={{fontSize:13,color:"#c0b8e8"}}>{f.label}</span></div>
-              <div style={{textAlign:"right"}}><div style={{fontSize:17,fontWeight:700,color:f.color}}>{summaryRec[f.key]}"</div><div style={{fontSize:11,color:"#7a6fb0"}}>= {toCm(summaryRec[f.key])} ซม.</div></div>
-            </div>)}
-          </div>
-          <button onClick={()=>setView("add")} style={{width:"100%",padding:14,border:"1px solid rgba(200,184,255,0.2)",borderRadius:14,background:"transparent",color:"#c8b8ff",fontSize:14,fontWeight:700,fontFamily:"inherit",cursor:"pointer"}}>+ บันทึกครั้งใหม่</button>
-        </div>}
-
-        {/* COMPARE */}
-        {view==="compare"&&<div style={{padding:"0 24px 100px"}}>
-          {records.length<2
-            ?<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48,marginBottom:12}}>⚖️</div><div>ต้องมีบันทึกอย่างน้อย 2 ครั้ง</div></div>
-            :<>
-              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:"8px 14px",marginBottom:14,fontSize:12,color:"#7a6fb0",display:"flex",gap:14}}><span>🟢 ลดลง</span><span>🔴 เพิ่มขึ้น</span></div>
-              <CmpSec title="ล่าสุด vs ก่อนหน้า" recA={previous} recB={latest} labelA="ครั้งก่อน" labelB="ล่าสุด"/>
-              {records.length>2&&<CmpSec title="ล่าสุด vs ครั้งแรกสุด" recA={first} recB={latest} labelA="ครั้งแรก" labelB="ล่าสุด"/>}
-              <button onClick={getAdvice} disabled={advLoading} style={{width:"100%",padding:14,border:"none",borderRadius:14,background:advLoading?"rgba(124,92,191,0.3)":"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:"#fff",fontSize:15,fontWeight:700,fontFamily:"inherit",cursor:advLoading?"not-allowed":"pointer",marginBottom:14}}>
-                {advLoading?"🤔 กำลังวิเคราะห์...":"✨ ขอคำแนะนำ"}
-              </button>
-              {advice&&<div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.1))",border:"1px solid rgba(200,184,255,0.2)",borderRadius:16,padding:18}}>
-                <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>💡 คำแนะนำ</div>
-                <div style={{fontSize:14,color:"#d0c8f0",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{advice}</div>
-              </div>}
-            </>
-          }
-        </div>}
-
-        {/* HISTORY */}
-        {view==="history"&&<div style={{padding:"0 24px 100px"}}>
-          <div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.08))",border:"1px solid rgba(200,184,255,0.15)",borderRadius:14,padding:"14px 16px",marginBottom:14}}>
-            <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>💾 สำรองข้อมูล</div>
-            <button onClick={handleCopy} style={{width:"100%",padding:13,border:"none",borderRadius:12,background:copied?"rgba(129,199,132,0.25)":"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:copied?"#81c784":"#fff",fontSize:14,fontWeight:700,fontFamily:"inherit",cursor:"pointer",marginBottom:10,transition:"all 0.3s"}}>
-              {copied?"✅ คัดลอกแล้ว! ไปวางใน Notes ได้เลย":"📋 Copy ข้อมูลทั้งหมด"}
-            </button>
-            <div style={{fontSize:12,color:"#6b5fa0",lineHeight:1.6}}>วิธีใช้: กด Copy → เปิด Notes → วางข้อความ → บันทึก</div>
-          </div>
-          <button onClick={()=>{setShowImport(v=>!v);setImportErr("");}} style={{width:"100%",padding:11,border:"1px solid rgba(129,212,250,0.25)",borderRadius:12,background:showImport?"rgba(74,154,212,0.15)":"transparent",color:"#81d4fa",fontSize:13,fontWeight:700,fontFamily:"inherit",cursor:"pointer",marginBottom:14}}>
-            📥 Import JSON (กู้ข้อมูล)
-          </button>
-          {importOk&&<div style={{background:"rgba(129,199,132,0.15)",border:"1px solid rgba(129,199,132,0.3)",borderRadius:12,padding:"10px 14px",marginBottom:12,fontSize:13,color:"#81c784"}}>✅ นำเข้าสำเร็จ!</div>}
-          {showImport&&<div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(129,212,250,0.2)",borderRadius:14,padding:14,marginBottom:14}}>
-            <div style={{fontSize:12,color:"#81d4fa",marginBottom:8}}>วาง JSON ที่ Copy ไว้ตรงนี้</div>
-            <textarea value={importText} onChange={e=>setImportText(e.target.value)} rows={5} style={{width:"100%",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"10px 12px",color:"#c0b8e8",fontSize:12,fontFamily:"monospace",resize:"none",outline:"none",boxSizing:"border-box",marginBottom:8}}/>
-            {importErr&&<div style={{fontSize:12,color:"#e57373",marginBottom:8}}>⚠️ {importErr}</div>}
-            <button onClick={handleImport} disabled={!importText.trim()} style={{width:"100%",padding:11,border:"none",borderRadius:10,background:importText.trim()?"linear-gradient(135deg,#4a9ad4,#7c5cbf)":"rgba(255,255,255,0.05)",color:importText.trim()?"#fff":"#4a4070",fontSize:13,fontWeight:700,fontFamily:"inherit",cursor:importText.trim()?"pointer":"not-allowed"}}>นำเข้าข้อมูล</button>
-          </div>}
-          {records.length===0&&<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48}}>📋</div><div>ยังไม่มีบันทึก</div></div>}
-          {records.map(rec=><div key={rec.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:16,marginBottom:12}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{fontSize:14,fontWeight:700,color:"#c8b8ff"}}>📅 {fmtTH(rec.date)}</div>
-              <button onClick={()=>saveRecs(records.filter(r=>r.id!==rec.id))} style={{background:"rgba(255,80,80,0.1)",border:"1px solid rgba(255,80,80,0.2)",borderRadius:8,color:"#ff6b6b",fontSize:11,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}}>ลบ</button>
-            </div>
-            {FIELDS.filter(f=>rec[f.key]!=null).map(f=><div key={f.key} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:f.color+"12",borderRadius:10,padding:"7px 12px",marginBottom:5}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#c0b8e8"}}><span>{f.icon}</span>{f.label}</div>
-              <div><span style={{fontWeight:700,color:f.color,fontSize:14}}>{rec[f.key]}"</span><span style={{fontSize:11,color:"#7a6fb0",marginLeft:6}}>({toCm(rec[f.key])} ซม.)</span></div>
-            </div>)}
-            {rec.note&&<div style={{marginTop:8,fontSize:13,color:"#7a6fb0",fontStyle:"italic"}}>"{rec.note}"</div>}
-          </div>)}
-        </div>}
-
-        {/* CHART */}
-        {view==="chart"&&<div style={{padding:"0 24px 100px"}}>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
-            {FIELDS.map(f=><button key={f.key} onClick={()=>setSelField(f.key)} style={{padding:"6px 11px",border:`1px solid ${selField===f.key?f.color:"rgba(255,255,255,0.1)"}`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",fontSize:11,background:selField===f.key?f.color+"22":"transparent",color:selField===f.key?f.color:"#7a6fb0"}}>{f.icon} {f.label}</button>)}
-          </div>
-          {cData.length===0
-            ?<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48}}>📊</div><div>ยังไม่มีข้อมูล</div></div>
-            :<>
-              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"18px 16px"}}>
-                <div style={{fontSize:12,color:"#9c8fd4",marginBottom:4}}>{fInfo.label} — ล่าสุด</div>
-                <div style={{display:"flex",alignItems:"baseline",gap:10,flexWrap:"wrap"}}>
-                  <div style={{fontSize:28,fontWeight:700,color:fInfo.color}}>{cData[cData.length-1][selField]}"</div>
-                  <div style={{fontSize:15,color:"#9c8fd4"}}>= {toCm(cData[cData.length-1][selField])} ซม.</div>
-                  {cData.length>1&&(()=>{const d=cData[cData.length-1][selField]-cData[0][selField];return<span style={{fontSize:13,color:d<=0?"#81c784":"#e57373"}}>{d>0?"▲":"▼"} {Math.abs(d).toFixed(2)}"</span>;})()}
-                </div>
-                <svg width="100%" height="120" viewBox={`0 0 ${Math.max(cData.length,1)*52} 120`} style={{marginTop:14,overflow:"visible"}}>
-                  {cData.map((r,i)=>{
-                    const x=i*52+26,y=95-((r[selField]-cMin)/Math.max(cMax-cMin,0.1))*80;
-                    const nx=(i+1)*52+26,ny=cData[i+1]?95-((cData[i+1][selField]-cMin)/Math.max(cMax-cMin,0.1))*80:null;
-                    return <g key={r.id}>{ny!=null&&<line x1={x} y1={y} x2={nx} y2={ny} stroke={fInfo.color} strokeWidth="2" strokeOpacity="0.7"/>}<circle cx={x} cy={y} r="5" fill={fInfo.color}/><text x={x} y="114" textAnchor="middle" fontSize="9" fill="#6b5fa0">{fmtTH(r.date).slice(0,5)}</text><text x={x} y={y-9} textAnchor="middle" fontSize="9" fill={fInfo.color}>{r[selField]}"</text></g>;
-                  })}
-                </svg>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
-                {[{l:"สูงสุด",v:Math.max(...cData.map(r=>r[selField]))},{l:"ต่ำสุด",v:Math.min(...cData.map(r=>r[selField]))}].map(s=><div key={s.l} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px"}}>
-                  <div style={{fontSize:11,color:"#7a6fb0",marginBottom:4}}>{s.l}</div>
-                  <div style={{fontSize:20,fontWeight:700,color:fInfo.color}}>{s.v}"</div>
-                  <div style={{fontSize:11,color:"#6b5fa0"}}>{toCm(s.v)} ซม.</div>
-                </div>)}
-              </div>
-            </>
-          }
-        </div>}
-      </div>;
+      setSyncing(false);
+      setTimeout(() => setSyncStatus(""), 3000);
     }
+    init();
+  }, []);
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  function saveRecs(r) {
+    const s = [...r].sort((a,b)=>b.date.localeCompare(a.date));
+    setRecords(s);
+    save(s);
+    // sync ไป Google Sheets ด้วย
+    setSyncStatus("🔄 กำลัง sync...");
+    syncToSheet(s).then(() => {
+      setSyncStatus("✅ Sync สำเร็จ");
+      setTimeout(() => setSyncStatus(""), 2500);
+    });
+  }
+
+  function handleAdd() {
+    if (!FIELDS.some(f=>form[f.key])) return;
+    const e = { id:Date.now(), date:selDate, note,
+      ...Object.fromEntries(FIELDS.map(f=>[f.key, form[f.key]?parseFloat(form[f.key]):null])) };
+    saveRecs([...records, e]);
+    setForm({}); setNote(""); setSummaryRec(e); setView("summary");
+  }
+
+  function handleCopy() {
+    const j = JSON.stringify(records, null, 2);
+    navigator.clipboard.writeText(j).catch(()=>{
+      const t=document.createElement("textarea"); t.value=j;
+      document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t);
+    });
+    setCopied(true); setTimeout(()=>setCopied(false), 2500);
+  }
+
+  function handleImport() {
+    setImportErr("");
+    try {
+      const data = JSON.parse(importText);
+      if (!Array.isArray(data)) throw new Error();
+      const cleaned = data.map(r=>({
+        id: r.id||Date.now()+Math.random(),
+        date: (r.date||todayStr()).slice(0,10), note:r.note||"",
+        ...Object.fromEntries(FIELDS.map(f=>[f.key,r[f.key]!=null?parseFloat(r[f.key]):null]))
+      }));
+      const ids = new Set(records.map(r=>r.id));
+      saveRecs([...records, ...cleaned.filter(r=>!ids.has(r.id))]);
+      setImportText(""); setShowImport(false); setImportOk(true);
+      setTimeout(()=>setImportOk(false), 3000);
+    } catch(_) { setImportErr("JSON ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง"); }
+  }
+
+  function getAdvice() {
+    const latest=records[0], prev=records[1];
+    if (!latest||!prev) return;
+    const inc = FIELDS.filter(f=>prev[f.key]!=null&&latest[f.key]!=null&&latest[f.key]>prev[f.key]);
+    if (!inc.length) { setAdvice("🎉 ดีมาก! ไม่มีค่าใดเพิ่มขึ้นเลย ทำต่อไปเรื่อยๆ นะ"); return; }
+    setAdvLoading(true); setAdvice(null);
+    setTimeout(()=>{
+      setAdvice(inc.map(f=>TIPS[f.key]||f.label).join("\n\n"));
+      setAdvLoading(false);
+    }, 500);
+  }
+
+  const latest   = records[0]||null;
+  const previous = records[1]||null;
+  const first    = records.length>1?records[records.length-1]:null;
+  const cData    = records.filter(r=>r[selField]!=null).slice(0,10).reverse();
+  const cMax     = cData.length?Math.max(...cData.map(r=>r[selField]))+2:30;
+  const cMin     = cData.length?Math.max(0,Math.min(...cData.map(r=>r[selField]))-2):0;
+  const fInfo    = FIELDS.find(f=>f.key===selField)||FIELDS[0];
+
+  const bg  = "linear-gradient(135deg,#0f0f1a,#1a1025,#0d1a2e)";
+  const btnS = active => ({ flex:1, padding:"9px 0", border:"none", borderRadius:9, cursor:"pointer", fontSize:12, fontFamily:"inherit", fontWeight:active?700:400, background:active?"linear-gradient(135deg,#7c5cbf,#4a9ad4)":"transparent", color:active?"#fff":"#7a6fb0" });
+  const cardS = { background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:14, padding:"14px 16px", marginBottom:10 };
+
+  function DiffBadge({val,base}) {
+    if (val==null||base==null) return null;
+    const d=+(val-base).toFixed(2), dn=d<0, z=d===0;
+    return <div style={{fontSize:11,fontWeight:700,padding:"3px 7px",borderRadius:7,whiteSpace:"nowrap",color:z?"#7a6fb0":dn?"#81c784":"#e57373",background:z?"rgba(122,111,176,0.1)":dn?"rgba(129,199,132,0.12)":"rgba(229,115,115,0.12)"}}>{z?"—":dn?"▼ ":"▲ "}{z?"ไม่เปลี่ยน":`${Math.abs(d)}" / ${Math.abs(toCm(d))} ซม.`}</div>;
+  }
+
+  function CmpSec({title,recA,recB,labelA,labelB}) {
+    if (!recA||!recB) return null;
+    return <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:16,marginBottom:14}}>
+      <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>{title}</div>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
+        <div style={{textAlign:"center",flex:1}}><div style={{fontSize:10,color:"#6b5fa0"}}>{labelA}</div><div style={{fontSize:12,fontWeight:700,color:"#c8b8ff"}}>{fmtTH(recA.date)}</div></div>
+        <div style={{display:"flex",alignItems:"center",color:"#4a4a7a"}}>→</div>
+        <div style={{textAlign:"center",flex:1}}><div style={{fontSize:10,color:"#6b5fa0"}}>{labelB}</div><div style={{fontSize:12,fontWeight:700,color:"#c8b8ff"}}>{fmtTH(recB.date)}</div></div>
+      </div>
+      {FIELDS.map(f=>{
+        const vA=recA[f.key],vB=recB[f.key];
+        if(vA==null&&vB==null) return null;
+        return <div key={f.key} style={{display:"flex",alignItems:"center",padding:"8px 10px",marginBottom:5,background:"rgba(0,0,0,0.2)",borderRadius:10,gap:6}}>
+          <span style={{fontSize:14,width:20}}>{f.icon}</span>
+          <div style={{fontSize:12,color:"#c0b8e8",flex:1}}>{f.label}</div>
+          <div style={{fontSize:12,color:"#7a6fb0"}}>{vA!=null?`${vA}"`:"—"}</div>
+          <div style={{color:"#4a4a7a",fontSize:11}}>→</div>
+          <div style={{fontSize:12,color:f.color,fontWeight:700}}>{vB!=null?`${vB}"`:"—"}</div>
+          <DiffBadge val={vB} base={vA}/>
+        </div>;
+      })}
+    </div>;
+  }
+
+  return <div style={{minHeight:"100vh",background:bg,fontFamily:"'Sarabun','Noto Sans Thai',sans-serif",color:"#f0eeff",maxWidth:430,margin:"0 auto"}}>
+    <div style={{position:"fixed",top:-80,right:-80,width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,rgba(138,43,226,0.15),transparent 70%)",pointerEvents:"none"}}/>
+
+    {/* Header */}
+    <div style={{padding:"28px 24px 16px"}}>
+      <div style={{fontSize:11,letterSpacing:3,color:"#9c8fd4",textTransform:"uppercase",marginBottom:4}}>Body Journal</div>
+      <h1 style={{fontSize:26,fontWeight:700,margin:0,background:"linear-gradient(90deg,#c8b8ff,#81d4fa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>สัดส่วนร่างกาย</h1>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
+        <div style={{fontSize:12,color:"#6b5fa0"}}>{records.length>0?`บันทึกแล้ว ${records.length} ครั้ง`:"ยังไม่มีข้อมูล"}</div>
+        {syncStatus && <div style={{fontSize:11,color: syncStatus.startsWith("✅")?"#81c784":syncStatus.startsWith("🔄")?"#9c8fd4":"#7a6fb0"}}>{syncStatus}</div>}
+      </div>
+    </div>
+
+    {/* Nav */}
+    <div style={{display:"flex",margin:"0 24px 20px",background:"rgba(255,255,255,0.05)",borderRadius:12,padding:4,gap:2}}>
+      {[{k:"add",l:"บันทึก"},{k:"compare",l:"เทียบ"},{k:"history",l:"ประวัติ"},{k:"chart",l:"กราฟ"}].map(t=>
+        <button key={t.k} onClick={()=>setView(t.k)} style={btnS(view===t.k)}>{t.l}</button>
+      )}
+    </div>
+
+    {/* ADD */}
+    {view==="add" && <div style={{padding:"0 24px 100px"}}>
+      <div style={{...cardS,display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:18}}>📅</span>
+        <div style={{flex:1}}>
+          <div style={{fontSize:11,color:"#9c8fd4",marginBottom:2}}>วันที่บันทึก</div>
+          <input type="date" value={selDate} onChange={e=>setSelDate(e.target.value)} style={{background:"transparent",border:"none",outline:"none",color:"#c8b8ff",fontSize:15,fontWeight:600,fontFamily:"inherit",width:"100%",colorScheme:"dark"}}/>
+        </div>
+      </div>
+      <div style={{fontSize:11,color:"#7a6fb0",margin:"4px 0 10px"}}>กรอกค่าเป็นนิ้ว — แปลงเป็น ซม. ให้อัตโนมัติ</div>
+      {FIELDS.map(f=><div key={f.key} style={{...cardS,display:"flex",alignItems:"center",gap:12}}>
+        <span style={{fontSize:20}}>{f.icon}</span>
+        <div style={{flex:1}}>
+          <div style={{fontSize:12,color:"#9c8fd4",marginBottom:4}}>{f.label}</div>
+          <input type="number" placeholder="นิ้ว" value={form[f.key]||""} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} style={{background:"transparent",border:"none",outline:"none",color:"#f0eeff",fontSize:22,fontWeight:600,fontFamily:"inherit",width:"100%"}}/>
+        </div>
+        {form[f.key]&&<div style={{textAlign:"right"}}><div style={{fontSize:14,fontWeight:700,color:f.color}}>{form[f.key]}"</div><div style={{fontSize:11,color:"#7a6fb0"}}>{toCm(parseFloat(form[f.key]))} ซม.</div></div>}
+      </div>)}
+      <textarea placeholder="โน้ตเพิ่มเติม" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"14px 16px",color:"#c0b8e8",fontSize:14,fontFamily:"inherit",resize:"none",outline:"none",boxSizing:"border-box",marginBottom:16}}/>
+      <button onClick={handleAdd} style={{width:"100%",padding:16,border:"none",borderRadius:14,cursor:"pointer",background:"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:"#fff",fontSize:16,fontWeight:700,fontFamily:"inherit",boxShadow:"0 8px 24px rgba(124,92,191,0.4)"}}>บันทึก & ดูสรุป</button>
+    </div>}
+
+    {/* SUMMARY */}
+    {view==="summary"&&summaryRec&&<div style={{padding:"0 24px 100px"}}>
+      <div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.2),rgba(74,154,212,0.15))",border:"1px solid rgba(200,184,255,0.2)",borderRadius:20,padding:20,marginBottom:16}}>
+        <div style={{fontSize:11,color:"#9c8fd4",letterSpacing:2,marginBottom:4}}>สรุปการบันทึก</div>
+        <div style={{fontSize:18,fontWeight:700,color:"#c8b8ff",marginBottom:14}}>📅 {fmtTH(summaryRec.date)}</div>
+        {FIELDS.filter(f=>summaryRec[f.key]!=null).map(f=><div key={f.key} style={{background:"rgba(0,0,0,0.2)",borderRadius:12,padding:"10px 14px",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span>{f.icon}</span><span style={{fontSize:13,color:"#c0b8e8"}}>{f.label}</span></div>
+          <div style={{textAlign:"right"}}><div style={{fontSize:17,fontWeight:700,color:f.color}}>{summaryRec[f.key]}"</div><div style={{fontSize:11,color:"#7a6fb0"}}>= {toCm(summaryRec[f.key])} ซม.</div></div>
+        </div>)}
+      </div>
+      <button onClick={()=>setView("add")} style={{width:"100%",padding:14,border:"1px solid rgba(200,184,255,0.2)",borderRadius:14,background:"transparent",color:"#c8b8ff",fontSize:14,fontWeight:700,fontFamily:"inherit",cursor:"pointer"}}>+ บันทึกครั้งใหม่</button>
+    </div>}
+
+    {/* COMPARE */}
+    {view==="compare"&&<div style={{padding:"0 24px 100px"}}>
+      {records.length<2
+        ?<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48,marginBottom:12}}>⚖️</div><div>ต้องมีบันทึกอย่างน้อย 2 ครั้ง</div></div>
+        :<>
+          <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:"8px 14px",marginBottom:14,fontSize:12,color:"#7a6fb0",display:"flex",gap:14}}><span>🟢 ลดลง</span><span>🔴 เพิ่มขึ้น</span></div>
+          <CmpSec title="ล่าสุด vs ก่อนหน้า" recA={previous} recB={latest} labelA="ครั้งก่อน" labelB="ล่าสุด"/>
+          {records.length>2&&<CmpSec title="ล่าสุด vs ครั้งแรกสุด" recA={first} recB={latest} labelA="ครั้งแรก" labelB="ล่าสุด"/>}
+          <button onClick={getAdvice} disabled={advLoading} style={{width:"100%",padding:14,border:"none",borderRadius:14,background:advLoading?"rgba(124,92,191,0.3)":"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:"#fff",fontSize:15,fontWeight:700,fontFamily:"inherit",cursor:advLoading?"not-allowed":"pointer",marginBottom:14}}>
+            {advLoading?"🤔 กำลังวิเคราะห์...":"✨ ขอคำแนะนำ"}
+          </button>
+          {advice&&<div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.1))",border:"1px solid rgba(200,184,255,0.2)",borderRadius:16,padding:18}}>
+            <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>💡 คำแนะนำ</div>
+            <div style={{fontSize:14,color:"#d0c8f0",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{advice}</div>
+          </div>}
+        </>
+      }
+    </div>}
+
+    {/* HISTORY */}
+    {view==="history"&&<div style={{padding:"0 24px 100px"}}>
+      <div style={{background:"linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.08))",border:"1px solid rgba(200,184,255,0.15)",borderRadius:14,padding:"14px 16px",marginBottom:14}}>
+        <div style={{fontSize:11,letterSpacing:2,color:"#9c8fd4",marginBottom:10,textTransform:"uppercase"}}>💾 สำรองข้อมูล</div>
+        <button onClick={handleCopy} style={{width:"100%",padding:13,border:"none",borderRadius:12,background:copied?"rgba(129,199,132,0.25)":"linear-gradient(135deg,#7c5cbf,#4a9ad4)",color:copied?"#81c784":"#fff",fontSize:14,fontWeight:700,fontFamily:"inherit",cursor:"pointer",marginBottom:10,transition:"all 0.3s"}}>
+          {copied?"✅ คัดลอกแล้ว! ไปวางใน Notes ได้เลย":"📋 Copy ข้อมูลทั้งหมด"}
+        </button>
+        <div style={{fontSize:12,color:"#6b5fa0",lineHeight:1.6}}>วิธีใช้: กด Copy → เปิด Notes → วางข้อความ → บันทึก</div>
+      </div>
+      <button onClick={()=>{setShowImport(v=>!v);setImportErr("");}} style={{width:"100%",padding:11,border:"1px solid rgba(129,212,250,0.25)",borderRadius:12,background:showImport?"rgba(74,154,212,0.15)":"transparent",color:"#81d4fa",fontSize:13,fontWeight:700,fontFamily:"inherit",cursor:"pointer",marginBottom:14}}>
+        📥 Import JSON (กู้ข้อมูล)
+      </button>
+      {importOk&&<div style={{background:"rgba(129,199,132,0.15)",border:"1px solid rgba(129,199,132,0.3)",borderRadius:12,padding:"10px 14px",marginBottom:12,fontSize:13,color:"#81c784"}}>✅ นำเข้าสำเร็จ!</div>}
+      {showImport&&<div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(129,212,250,0.2)",borderRadius:14,padding:14,marginBottom:14}}>
+        <div style={{fontSize:12,color:"#81d4fa",marginBottom:8}}>วาง JSON ที่ Copy ไว้ตรงนี้</div>
+        <textarea value={importText} onChange={e=>setImportText(e.target.value)} rows={5} style={{width:"100%",background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"10px 12px",color:"#c0b8e8",fontSize:12,fontFamily:"monospace",resize:"none",outline:"none",boxSizing:"border-box",marginBottom:8}}/>
+        {importErr&&<div style={{fontSize:12,color:"#e57373",marginBottom:8}}>⚠️ {importErr}</div>}
+        <button onClick={handleImport} disabled={!importText.trim()} style={{width:"100%",padding:11,border:"none",borderRadius:10,background:importText.trim()?"linear-gradient(135deg,#4a9ad4,#7c5cbf)":"rgba(255,255,255,0.05)",color:importText.trim()?"#fff":"#4a4070",fontSize:13,fontWeight:700,fontFamily:"inherit",cursor:importText.trim()?"pointer":"not-allowed"}}>นำเข้าข้อมูล</button>
+      </div>}
+      {records.length===0&&<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48}}>📋</div><div>ยังไม่มีบันทึก</div></div>}
+      {records.map(rec=><div key={rec.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:16,marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <div style={{fontSize:14,fontWeight:700,color:"#c8b8ff"}}>📅 {fmtTH(rec.date)}</div>
+          <button onClick={()=>saveRecs(records.filter(r=>r.id!==rec.id))} style={{background:"rgba(255,80,80,0.1)",border:"1px solid rgba(255,80,80,0.2)",borderRadius:8,color:"#ff6b6b",fontSize:11,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}}>ลบ</button>
+        </div>
+        {FIELDS.filter(f=>rec[f.key]!=null).map(f=><div key={f.key} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:f.color+"12",borderRadius:10,padding:"7px 12px",marginBottom:5}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#c0b8e8"}}><span>{f.icon}</span>{f.label}</div>
+          <div><span style={{fontWeight:700,color:f.color,fontSize:14}}>{rec[f.key]}"</span><span style={{fontSize:11,color:"#7a6fb0",marginLeft:6}}>({toCm(rec[f.key])} ซม.)</span></div>
+        </div>)}
+        {rec.note&&<div style={{marginTop:8,fontSize:13,color:"#7a6fb0",fontStyle:"italic"}}>"{rec.note}"</div>}
+      </div>)}
+    </div>}
+
+    {/* CHART */}
+    {view==="chart"&&<div style={{padding:"0 24px 100px"}}>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+        {FIELDS.map(f=><button key={f.key} onClick={()=>setSelField(f.key)} style={{padding:"6px 11px",border:`1px solid ${selField===f.key?f.color:"rgba(255,255,255,0.1)"}`,borderRadius:20,cursor:"pointer",fontFamily:"inherit",fontSize:11,background:selField===f.key?f.color+"22":"transparent",color:selField===f.key?f.color:"#7a6fb0"}}>{f.icon} {f.label}</button>)}
+      </div>
+      {cData.length===0
+        ?<div style={{textAlign:"center",padding:"60px 0",color:"#5a4f80"}}><div style={{fontSize:48}}>📊</div><div>ยังไม่มีข้อมูล</div></div>
+        :<>
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"18px 16px"}}>
+            <div style={{fontSize:12,color:"#9c8fd4",marginBottom:4}}>{fInfo.label} — ล่าสุด</div>
+            <div style={{display:"flex",alignItems:"baseline",gap:10,flexWrap:"wrap"}}>
+              <div style={{fontSize:28,fontWeight:700,color:fInfo.color}}>{cData[cData.length-1][selField]}"</div>
+              <div style={{fontSize:15,color:"#9c8fd4"}}>= {toCm(cData[cData.length-1][selField])} ซม.</div>
+              {cData.length>1&&(()=>{const d=cData[cData.length-1][selField]-cData[0][selField];return<span style={{fontSize:13,color:d<=0?"#81c784":"#e57373"}}>{d>0?"▲":"▼"} {Math.abs(d).toFixed(2)}"</span>;})()}
+            </div>
+            <svg width="100%" height="120" viewBox={`0 0 ${Math.max(cData.length,1)*52} 120`} style={{marginTop:14,overflow:"visible"}}>
+              {cData.map((r,i)=>{
+                const x=i*52+26,y=95-((r[selField]-cMin)/Math.max(cMax-cMin,0.1))*80;
+                const nx=(i+1)*52+26,ny=cData[i+1]?95-((cData[i+1][selField]-cMin)/Math.max(cMax-cMin,0.1))*80:null;
+                return <g key={r.id}>{ny!=null&&<line x1={x} y1={y} x2={nx} y2={ny} stroke={fInfo.color} strokeWidth="2" strokeOpacity="0.7"/>}<circle cx={x} cy={y} r="5" fill={fInfo.color}/><text x={x} y="114" textAnchor="middle" fontSize="9" fill="#6b5fa0">{fmtTH(r.date).slice(0,5)}</text><text x={x} y={y-9} textAnchor="middle" fontSize="9" fill={fInfo.color}>{r[selField]}"</text></g>;
+              })}
+            </svg>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
+            {[{l:"สูงสุด",v:Math.max(...cData.map(r=>r[selField]))},{l:"ต่ำสุด",v:Math.min(...cData.map(r=>r[selField]))}].map(s=><div key={s.l} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{fontSize:11,color:"#7a6fb0",marginBottom:4}}>{s.l}</div>
+              <div style={{fontSize:20,fontWeight:700,color:fInfo.color}}>{s.v}"</div>
+              <div style={{fontSize:11,color:"#6b5fa0"}}>{toCm(s.v)} ซม.</div>
+            </div>)}
+          </div>
+        </>
+      }
+    </div>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+```
+
   </script>
 </body>
-</html>
+</html></html>

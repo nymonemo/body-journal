@@ -54,25 +54,54 @@
       try { localStorage.setItem(KEY, JSON.stringify(r)); } catch(_){}
     }
     async function syncToSheet(records) {
-      try {
-        const url = SHEET_URL + "?action=save&data=" + encodeURIComponent(JSON.stringify(records));
-        await fetch(url, { method: "GET", mode: "no-cors" });
-      } catch(_) {}
+      return new Promise((resolve) => {
+        try {
+          const cbName = "cb_" + Date.now();
+          window[cbName] = function(res) {
+            delete window[cbName];
+            document.getElementById(cbName)?.remove();
+            resolve(res);
+          };
+          const url = SHEET_URL
+            + "?callback=" + cbName
+            + "&action=save"
+            + "&data=" + encodeURIComponent(JSON.stringify(records));
+          const s = document.createElement("script");
+          s.id = cbName;
+          s.src = url;
+          s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
+          document.head.appendChild(s);
+        } catch(_) { resolve(null); }
+      });
     }
+
     async function loadFromSheet() {
-      try {
-        const res = await fetch(SHEET_URL + "?action=load");
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return data.map(r => ({
-            id: r.id || Date.now() + Math.random(),
-            date: (r.date||"").slice(0,10),
-            note: r.note||"",
-            ...Object.fromEntries(FIELDS.map(f=>[f.key, r[f.key]!=null&&r[f.key]!==""?parseFloat(r[f.key]):null]))
-          })).filter(r => r.date);
-        }
-      } catch(_) {}
-      return null;
+      return new Promise((resolve) => {
+        try {
+          const cbName = "cb_" + Date.now();
+          window[cbName] = function(data) {
+            delete window[cbName];
+            document.getElementById(cbName)?.remove();
+            if (Array.isArray(data) && data.length > 0) {
+              const parsed = data.map(r => ({
+                id: r.id || Date.now() + Math.random(),
+                date: (String(r.date||"")).slice(0,10),
+                note: r.note||"",
+                ...Object.fromEntries(FIELDS.map(f=>[f.key, r[f.key]!=null&&r[f.key]!==""?parseFloat(r[f.key]):null]))
+              })).filter(r => r.date && r.date.length === 10);
+              resolve(parsed);
+            } else {
+              resolve(null);
+            }
+          };
+          const url = SHEET_URL + "?callback=" + cbName + "&action=load";
+          const s = document.createElement("script");
+          s.id = cbName;
+          s.src = url;
+          s.onerror = () => { delete window[cbName]; s.remove(); resolve(null); };
+          document.head.appendChild(s);
+        } catch(_) { resolve(null); }
+      });
     }
 
     const TIPS = {

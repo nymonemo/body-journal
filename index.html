@@ -36,6 +36,7 @@
     ];
 
     const KEY = "body-journal-records";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbzaafpfd1TSWpQ6-wKIn2KICVzH4F9Dg-5kkD6QMJxlGiX8kj8Wt5KWMdNc1M40CJHi/exec";
     const toCm = v => +(v * 2.54).toFixed(1);
 
     function todayStr() {
@@ -51,6 +52,29 @@
     }
     function save(r) {
       try { localStorage.setItem(KEY, JSON.stringify(r)); } catch(_){}
+    }
+    async function syncToSheet(records) {
+      try {
+        await fetch(SHEET_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "save", records }),
+        });
+      } catch(_) {}
+    }
+    async function loadFromSheet() {
+      try {
+        const res = await fetch(SHEET_URL + "?action=load");
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return data.map(r => ({
+            id: r.id || Date.now() + Math.random(),
+            date: (r.date||"").slice(0,10),
+            note: r.note||"",
+            ...Object.fromEntries(FIELDS.map(f=>[f.key, r[f.key]!=null&&r[f.key]!==""?parseFloat(r[f.key]):null]))
+          })).filter(r => r.date);
+        }
+      } catch(_) {}
+      return null;
     }
 
     const TIPS = {
@@ -78,10 +102,39 @@
       const [importOk, setImportOk]     = useState(false);
       const [showImport, setShowImport] = useState(false);
       const [copied, setCopied]   = useState(false);
+      const [syncing, setSyncing] = useState(false);
+      const [syncStatus, setSyncStatus] = useState("");
+
+      // โหลดข้อมูลจาก Google Sheets ตอนเปิดแอพ
+      useEffect(() => {
+        async function init() {
+          setSyncing(true);
+          setSyncStatus("🔄 กำลังโหลดจาก Google Sheets...");
+          const sheetData = await loadFromSheet();
+          if (sheetData && sheetData.length > 0) {
+            const sorted = [...sheetData].sort((a,b)=>b.date.localeCompare(a.date));
+            setRecords(sorted);
+            save(sorted);
+            setSyncStatus("✅ โหลดข้อมูลสำเร็จ");
+          } else {
+            setSyncStatus("📱 ใช้ข้อมูลในเครื่อง");
+          }
+          setSyncing(false);
+          setTimeout(() => setSyncStatus(""), 3000);
+        }
+        init();
+      }, []);
 
       function saveRecs(r) {
         const s = [...r].sort((a,b)=>b.date.localeCompare(a.date));
-        setRecords(s); save(s);
+        setRecords(s);
+        save(s);
+        // sync ไป Google Sheets ด้วย
+        setSyncStatus("🔄 กำลัง sync...");
+        syncToSheet(s).then(() => {
+          setSyncStatus("✅ Sync สำเร็จ");
+          setTimeout(() => setSyncStatus(""), 2500);
+        });
       }
 
       function handleAdd() {
@@ -179,7 +232,10 @@
         <div style={{padding:"28px 24px 16px"}}>
           <div style={{fontSize:11,letterSpacing:3,color:"#9c8fd4",textTransform:"uppercase",marginBottom:4}}>Body Journal</div>
           <h1 style={{fontSize:26,fontWeight:700,margin:0,background:"linear-gradient(90deg,#c8b8ff,#81d4fa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>สัดส่วนร่างกาย</h1>
-          <div style={{fontSize:12,color:"#6b5fa0",marginTop:4}}>{records.length>0?`บันทึกแล้ว ${records.length} ครั้ง`:"ยังไม่มีข้อมูล"}</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
+            <div style={{fontSize:12,color:"#6b5fa0"}}>{records.length>0?`บันทึกแล้ว ${records.length} ครั้ง`:"ยังไม่มีข้อมูล"}</div>
+            {syncStatus && <div style={{fontSize:11,color: syncStatus.startsWith("✅")?"#81c784":syncStatus.startsWith("🔄")?"#9c8fd4":"#7a6fb0"}}>{syncStatus}</div>}
+          </div>
         </div>
 
         {/* Nav */}

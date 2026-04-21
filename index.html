@@ -55,10 +55,8 @@
     }
     async function syncToSheet(records) {
       try {
-        await fetch(SHEET_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "save", records }),
-        });
+        const url = SHEET_URL + "?action=save&data=" + encodeURIComponent(JSON.stringify(records));
+        await fetch(url, { method: "GET", mode: "no-cors" });
       } catch(_) {}
     }
     async function loadFromSheet() {

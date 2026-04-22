@@ -89,9 +89,7 @@ textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <div style="text-align:center;padding:40px;color:#9c8fd4">กำลังโหลด...</div>
-</div>
+<div class="app" id="app"></div>
 <script>
 const FIELDS=[
   {key:"chest",label:"รอบอก",icon:"❤️",color:"#e57373"},
@@ -518,20 +516,26 @@ els.filter(Boolean).forEach(el=>view.appendChild(el));
 app.appendChild(view);
 }
 
-// init
+// init - render ทันที ไม่รอ Sheet
 render();
+
+// โหลด Sheet ใน background
+setTimeout(()=>{
 setState({syncStatus:“🔄 กำลังโหลด…”});
+const timer=setTimeout(()=>setState({syncStatus:””}),8000); // timeout 8 วิ
 loadFromSheet().then(data=>{
+clearTimeout(timer);
 if(data&&data.length>0){
 const sorted=[…data].sort((a,b)=>b.date.localeCompare(a.date));
 state.records=sorted;
 saveLocal(sorted);
 setState({syncStatus:“✅ โหลดสำเร็จ”});
 }else{
-setState({syncStatus:“📱 ข้อมูลในเครื่อง”});
+setState({syncStatus:””});
 }
 setTimeout(()=>setState({syncStatus:””}),2500);
 });
+},100);
 </script>
 
 </body>

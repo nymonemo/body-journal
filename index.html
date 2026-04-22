@@ -101,7 +101,6 @@ const FIELDS=[
   {key:"thighR",label:"ต้นขาขวา",icon:"🦵",color:"#4fc3f7"},
 ];
 const SKEY="body-journal-records";
-const SHEET="https://script.google.com/macros/s/AKfycbxk2mMwFfXogbhse1WJQITsR0KS_c6DuIYpSPgT5x588nCYh-qRD5BvCCJrYXsid8V7/exec";
 const toCm=v=>+(v*2.54).toFixed(1);
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 function fmtTH(s){if(!s)return"";const[y,m,d]=s.slice(0,10).split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});}
@@ -133,7 +132,6 @@ importText:””,
 importErr:””,
 importOk:false,
 copied:false,
-syncStatus:””,
 };
 
 function setState(patch){Object.assign(state,patch);render();}
@@ -142,48 +140,8 @@ function saveRecs(r){
 const s=[…r].sort((a,b)=>b.date.localeCompare(a.date));
 state.records=s;
 saveLocal(s);
-setState({syncStatus:“🔄 กำลัง sync…”});
-syncToSheet(s).then(()=>setState({syncStatus:“✅ Sync สำเร็จ”}));
-setTimeout(()=>setState({syncStatus:””}),2500);
+render();
 return s;
-}
-
-async function syncToSheet(records){
-return new Promise(resolve=>{
-try{
-const cb=“cb_”+Date.now();
-window[cb]=function(){delete window[cb];document.getElementById(cb)?.remove();resolve();};
-const url=SHEET+”?callback=”+cb+”&action=save&data=”+encodeURIComponent(JSON.stringify(records));
-const s=document.createElement(“script”);
-s.id=cb;s.src=url;
-s.onerror=()=>{delete window[cb];s.remove();resolve();};
-document.head.appendChild(s);
-}catch(_){resolve();}
-});
-}
-
-async function loadFromSheet(){
-return new Promise(resolve=>{
-try{
-const cb=“cb_”+Date.now();
-window[cb]=function(data){
-delete window[cb];document.getElementById(cb)?.remove();
-if(Array.isArray(data)&&data.length>0){
-const parsed=data.map(r=>({
-id:r.id||Date.now()+Math.random(),
-date:String(r.date||””).slice(0,10),
-note:r.note||””,
-…Object.fromEntries(FIELDS.map(f=>[f.key,r[f.key]!=null&&r[f.key]!==””?parseFloat(r[f.key]):null]))
-})).filter(r=>r.date&&r.date.length===10);
-resolve(parsed);
-}else resolve(null);
-};
-const s=document.createElement(“script”);
-s.id=cb;s.src=SHEET+”?callback=”+cb+”&action=load”;
-s.onerror=()=>{delete window[cb];s.remove();resolve(null);};
-document.head.appendChild(s);
-}catch(_){resolve(null);}
-});
 }
 
 function h(tag,attrs,children){
@@ -488,7 +446,7 @@ const app=document.getElementById(“app”);
 app.innerHTML=””;
 
 // header
-const syncEl=state.syncStatus?h(“div”,{className:“sync-status “+(state.syncStatus.startsWith(“✅”)?“sync-ok”:“sync-loading”)},state.syncStatus):null;
+const syncEl=null;
 app.appendChild(h(“div”,{className:“header”},[
 h(“div”,{className:“header-sub”},“Body Journal”),
 h(“h1”,{},“สัดส่วนร่างกาย”),
@@ -516,26 +474,8 @@ els.filter(Boolean).forEach(el=>view.appendChild(el));
 app.appendChild(view);
 }
 
-// init - render ทันที ไม่รอ Sheet
+// init
 render();
-
-// โหลด Sheet ใน background
-setTimeout(()=>{
-setState({syncStatus:“🔄 กำลังโหลด…”});
-const timer=setTimeout(()=>setState({syncStatus:””}),8000); // timeout 8 วิ
-loadFromSheet().then(data=>{
-clearTimeout(timer);
-if(data&&data.length>0){
-const sorted=[…data].sort((a,b)=>b.date.localeCompare(a.date));
-state.records=sorted;
-saveLocal(sorted);
-setState({syncStatus:“✅ โหลดสำเร็จ”});
-}else{
-setState({syncStatus:””});
-}
-setTimeout(()=>setState({syncStatus:””}),2500);
-});
-},100);
 </script>
 
 </body>

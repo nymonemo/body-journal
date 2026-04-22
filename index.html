@@ -33,7 +33,7 @@ body::after {
 </style>
 </head>
 <body>
-<div id="app"><p style="padding:20px;color:#c4849c">กำลังโหลด...</p></div>
+<div id="app"></div>
 <script>
 var FIELDS = [
   {key:"chest",  label:"รอบอก",     icon:"🌸", color:"#f4a7b9"},
@@ -53,13 +53,13 @@ function toCm(v){return Math.round(v*2.54*10)/10;}
 function fmtDate(s){if(!s)return"";var p=s.slice(0,10).split("-");var d=new Date(+p[0],+p[1]-1,+p[2]);return d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});}
 
 var TIPS = {
-chest:  “รอบอก:\n- Push-up 3x15\n- Dumbbell Press 3x12\n- ลดแป้ง น้ำตาล\n- Cardio 30 นาที/วัน”,
-waist:  “รอบเอว:\n- Plank 4x60 วิ\n- Bicycle Crunch 3x20\n- Russian Twist 3x20\n- ลดโซเดียม งดน้ำอัดลม”,
-hip:    “รอบสะโพก:\n- Sumo Squat 4x15\n- Hip Thrust 4x12\n- Donkey Kick 3x15\n- ปั่นจักรยาน 30 นาที”,
-armL:   “แขนซ้าย:\n- Tricep Dip 3x15\n- Overhead Extension 3x12\n- Bicep Curl 3x12\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
-armR:   “แขนขวา:\n- Tricep Dip 3x15\n- Overhead Extension 3x12\n- Bicep Curl 3x12\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
-thighL: “ต้นขาซ้าย:\n- Sumo Squat 4x15\n- Side Lunge 3x12\n- Curtsy Lunge 3x12\n- ปั่นจักรยาน ระดับแรงต้านสูง”,
-thighR: “ต้นขาขวา:\n- Sumo Squat 4x15\n- Side Lunge 3x12\n- Curtsy Lunge 3x12\n- ปั่นจักรยาน ระดับแรงต้านสูง”
+chest:  “รอบอก:\n- Push-up 3 เซต x 15 ครั้ง\n- Dumbbell Press 3 เซต x 12 ครั้ง\n- ลดแป้งและน้ำตาล\n- Cardio 30 นาที/วัน”,
+waist:  “รอบเอว:\n- Plank 4 เซต x 60 วินาที\n- Bicycle Crunch 3 เซต x 20 ครั้ง\n- Russian Twist 3 เซต x 20 ครั้ง\n- ลดโซเดียม งดน้ำอัดลม”,
+hip:    “รอบสะโพก:\n- Sumo Squat 4 เซต x 15 ครั้ง\n- Hip Thrust 4 เซต x 12 ครั้ง\n- Donkey Kick 3 เซต x 15 ครั้ง\n- ปั่นจักรยาน 30 นาที”,
+armL:   “แขนซ้าย:\n- Tricep Dip 3 เซต x 15 ครั้ง\n- Overhead Extension 3 เซต x 12 ครั้ง\n- Bicep Curl 3 เซต x 12 ครั้ง\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
+armR:   “แขนขวา:\n- Tricep Dip 3 เซต x 15 ครั้ง\n- Overhead Extension 3 เซต x 12 ครั้ง\n- Bicep Curl 3 เซต x 12 ครั้ง\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
+thighL: “ต้นขาซ้าย:\n- Sumo Squat 4 เซต x 15 ครั้ง\n- Side Lunge 3 เซต x 12 ครั้ง\n- Curtsy Lunge 3 เซต x 12 ครั้ง\n- ปั่นจักรยาน ระดับแรงต้านสูง”,
+thighR: “ต้นขาขวา:\n- Sumo Squat 4 เซต x 15 ครั้ง\n- Side Lunge 3 เซต x 12 ครั้ง\n- Curtsy Lunge 3 เซต x 12 ครั้ง\n- ปั่นจักรยาน ระดับแรงต้านสูง”
 };
 
 var state = {
@@ -377,7 +377,7 @@ stats.appendChild(sc);
 }); c.appendChild(stats);
 }
 
-render();
+try { render(); } catch(e) { document.getElementById(“app”).innerHTML = ’<p style="padding:20px;color:#f4a7b9;font-size:13px">Error: ’ + (e.message||e) + ‘</p>’; }
 </script>
 
 </body>

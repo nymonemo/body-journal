@@ -36,13 +36,13 @@ body::after {
 <div id="app"></div>
 <script>
 var FIELDS = [
-  {key:"chest",  label:"รอบอก",     icon:"🌸", color:"#f4a7b9"},
-  {key:"waist",  label:"รอบเอว",    icon:"🎀", color:"#f9c4d2"},
-  {key:"hip",    label:"รอบสะโพก",  icon:"🌺", color:"#e8a0bf"},
-  {key:"armL",   label:"แขนซ้าย",   icon:"🍑", color:"#ffcba4"},
-  {key:"armR",   label:"แขนขวา",    icon:"🍑", color:"#ffd6b8"},
-  {key:"thighL", label:"ต้นขาซ้าย", icon:"🌷", color:"#c9a8e0"},
-  {key:"thighR", label:"ต้นขาขวา",  icon:"🌷", color:"#d4b8ec"}
+  {key:"chest",  label:"รอบอก",     icon:"*", color:"#f4a7b9"},
+  {key:"waist",  label:"รอบเอว",    icon:"*", color:"#f9c4d2"},
+  {key:"hip",    label:"รอบสะโพก",  icon:"*", color:"#e8a0bf"},
+  {key:"armL",   label:"แขนซ้าย",   icon:"*", color:"#ffcba4"},
+  {key:"armR",   label:"แขนขวา",    icon:"*", color:"#ffd6b8"},
+  {key:"thighL", label:"ต้นขาซ้าย", icon:"*", color:"#c9a8e0"},
+  {key:"thighR", label:"ต้นขาขวา",  icon:"*", color:"#d4b8ec"}
 ];
 var SKEY = "body-journal-v1";
 function loadData(){try{var r=localStorage.getItem(SKEY);if(r)return JSON.parse(r);}catch(e){}return[];}

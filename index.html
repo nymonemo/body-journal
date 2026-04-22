@@ -475,7 +475,11 @@ app.appendChild(view);
 }
 
 // init
+try {
 render();
+} catch(e) {
+document.getElementById(“app”).innerHTML = ’<div style="padding:40px;color:#e57373;font-size:14px">Error: ’ + e.message + ‘</div>’;
+}
 </script>
 
 </body>

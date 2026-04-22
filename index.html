@@ -2,484 +2,382 @@
 
 <html lang="th">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#0f0f1a"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Body Journal"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1e1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Body Journal">
 <title>Body Journal</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:linear-gradient(135deg,#0f0f1a,#1a1025,#0d1a2e);font-family:'Sarabun','Noto Sans Thai',sans-serif;color:#f0eeff;min-height:100vh}
-input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
-.app{max-width:430px;margin:0 auto;padding-bottom:80px}
-.header{padding:28px 24px 16px}
-.header-sub{font-size:11px;letter-spacing:3px;color:#9c8fd4;text-transform:uppercase;margin-bottom:4px}
-.header h1{font-size:26px;font-weight:700;background:linear-gradient(90deg,#c8b8ff,#81d4fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-meta{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:12px;color:#6b5fa0}
-.sync-status{font-size:11px}
-.sync-ok{color:#81c784}.sync-loading{color:#9c8fd4}.sync-local{color:#7a6fb0}
-.nav{display:flex;margin:0 24px 20px;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;gap:2px}
-.nav button{flex:1;padding:9px 0;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:400;background:transparent;color:#7a6fb0;transition:all 0.2s}
-.nav button.active{font-weight:700;background:linear-gradient(135deg,#7c5cbf,#4a9ad4);color:#fff}
-.view{padding:0 24px}
-.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 16px;margin-bottom:10px}
-.field-label{font-size:12px;color:#9c8fd4;margin-bottom:4px}
-.field-input{background:transparent;border:none;outline:none;color:#f0eeff;font-size:22px;font-weight:600;font-family:inherit;width:100%}
-.field-cm{font-size:11px;color:#7a6fb0}
-.field-in{font-size:14px;font-weight:700}
-textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 16px;color:#c0b8e8;font-size:14px;font-family:inherit;resize:none;outline:none;margin-bottom:16px}
-.btn-main{width:100%;padding:16px;border:none;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,#7c5cbf,#4a9ad4);color:#fff;font-size:16px;font-weight:700;font-family:inherit;box-shadow:0 8px 24px rgba(124,92,191,0.4)}
-.btn-outline{width:100%;padding:14px;border:1px solid rgba(200,184,255,0.2);border-radius:14px;background:transparent;color:#c8b8ff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:10px}
-.summary-box{background:linear-gradient(135deg,rgba(124,92,191,0.2),rgba(74,154,212,0.15));border:1px solid rgba(200,184,255,0.2);border-radius:20px;padding:20px;margin-bottom:16px}
-.summary-title{font-size:11px;color:#9c8fd4;letter-spacing:2px;margin-bottom:4px}
-.summary-date{font-size:18px;font-weight:700;color:#c8b8ff;margin-bottom:14px}
-.summary-row{background:rgba(0,0,0,0.2);border-radius:12px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.compare-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px}
-.compare-title{font-size:11px;letter-spacing:2px;color:#9c8fd4;margin-bottom:10px;text-transform:uppercase}
-.compare-dates{display:flex;justify-content:space-between;margin-bottom:12px}
-.compare-date-col{text-align:center;flex:1}
-.compare-date-label{font-size:10px;color:#6b5fa0}
-.compare-date-val{font-size:12px;font-weight:700;color:#c8b8ff}
-.compare-row{display:flex;align-items:center;padding:8px 10px;margin-bottom:5px;background:rgba(0,0,0,0.2);border-radius:10px;gap:6px}
-.diff-badge{font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;white-space:nowrap}
-.diff-down{color:#81c784;background:rgba(129,199,132,0.12)}
-.diff-up{color:#e57373;background:rgba(229,115,115,0.12)}
-.diff-zero{color:#7a6fb0;background:rgba(122,111,176,0.1)}
-.advice-box{background:linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.1));border:1px solid rgba(200,184,255,0.2);border-radius:16px;padding:18px;margin-top:10px}
-.advice-title{font-size:11px;letter-spacing:2px;color:#9c8fd4;margin-bottom:10px;text-transform:uppercase}
-.advice-text{font-size:14px;color:#d0c8f0;line-height:1.7;white-space:pre-wrap}
-.backup-box{background:linear-gradient(135deg,rgba(124,92,191,0.12),rgba(74,154,212,0.08));border:1px solid rgba(200,184,255,0.15);border-radius:14px;padding:14px 16px;margin-bottom:14px}
-.backup-title{font-size:11px;letter-spacing:2px;color:#9c8fd4;margin-bottom:10px;text-transform:uppercase}
-.btn-copy{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c5cbf,#4a9ad4);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;transition:all 0.3s}
-.btn-copy.copied{background:rgba(129,199,132,0.25);color:#81c784}
-.backup-hint{font-size:12px;color:#6b5fa0;line-height:1.6}
-.btn-import{width:100%;padding:11px;border:1px solid rgba(129,212,250,0.25);border-radius:12px;background:transparent;color:#81d4fa;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:14px}
-.import-box{background:rgba(255,255,255,0.04);border:1px solid rgba(129,212,250,0.2);border-radius:14px;padding:14px;margin-bottom:14px}
-.import-hint{font-size:12px;color:#81d4fa;margin-bottom:8px}
-.import-ta{width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;color:#c0b8e8;font-size:12px;font-family:monospace;resize:none;outline:none;margin-bottom:8px}
-.import-err{font-size:12px;color:#e57373;margin-bottom:8px}
-.import-ok{background:rgba(129,199,132,0.15);border:1px solid rgba(129,199,132,0.3);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#81c784}
-.btn-import-do{width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#4a9ad4,#7c5cbf);color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
-.rec-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;margin-bottom:12px}
-.rec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.rec-date{font-size:14px;font-weight:700;color:#c8b8ff}
-.btn-del{background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.2);border-radius:8px;color:#ff6b6b;font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit}
-.rec-row{display:flex;align-items:center;justify-content:space-between;border-radius:10px;padding:7px 12px;margin-bottom:5px}
-.rec-label{display:flex;align-items:center;gap:8px;font-size:13px;color:#c0b8e8}
-.rec-val{font-weight:700;font-size:14px}
-.rec-cm{font-size:11px;color:#7a6fb0;margin-left:6px}
-.chart-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.chart-tab{padding:6px 11px;border-radius:20px;cursor:pointer;font-family:inherit;font-size:11px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#7a6fb0}
-.chart-tab.active{border-color:var(--fc);background:rgba(255,255,255,0.08)}
-.chart-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:18px 16px}
-.chart-label{font-size:12px;color:#9c8fd4;margin-bottom:4px}
-.chart-val{font-size:28px;font-weight:700}
-.chart-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.chart-stat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 14px}
-.chart-stat-label{font-size:11px;color:#7a6fb0;margin-bottom:4px}
-.chart-stat-val{font-size:20px;font-weight:700}
-.chart-stat-cm{font-size:11px;color:#6b5fa0}
-.empty{text-align:center;padding:60px 0;color:#5a4f80}
-.empty-icon{font-size:48px;margin-bottom:12px}
-.legend{background:rgba(255,255,255,0.03);border-radius:12px;padding:8px 14px;margin-bottom:14px;font-size:12px;color:#7a6fb0;display:flex;gap:14px}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: linear-gradient(160deg, #1e1220 0%, #241526 40%, #1a1528 100%);
+  color: #f5e6f0; font-family: sans-serif; min-height: 100vh;
+}
+#app { max-width: 430px; margin: 0 auto; padding-bottom: 80px; }
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+body::before {
+  content: ""; position: fixed; top: -100px; left: -100px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,182,193,0.08) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ""; position: fixed; bottom: -80px; right: -80px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(216,180,254,0.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+#app { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+<div id="app"><p style="padding:20px;color:#c4849c">กำลังโหลด...</p></div>
 <script>
-const FIELDS=[
-  {key:"chest",label:"รอบอก",icon:"❤️",color:"#e57373"},
-  {key:"waist",label:"รอบเอว",icon:"⚡",color:"#ffb74d"},
-  {key:"hip",label:"รอบสะโพก",icon:"✨",color:"#f06292"},
-  {key:"armL",label:"แขนซ้าย",icon:"💪",color:"#81c784"},
-  {key:"armR",label:"แขนขวา",icon:"💪",color:"#a5d6a7"},
-  {key:"thighL",label:"ต้นขาซ้าย",icon:"🦵",color:"#64b5f6"},
-  {key:"thighR",label:"ต้นขาขวา",icon:"🦵",color:"#4fc3f7"},
+var FIELDS = [
+  {key:"chest",  label:"รอบอก",     icon:"🌸", color:"#f4a7b9"},
+  {key:"waist",  label:"รอบเอว",    icon:"🎀", color:"#f9c4d2"},
+  {key:"hip",    label:"รอบสะโพก",  icon:"🌺", color:"#e8a0bf"},
+  {key:"armL",   label:"แขนซ้าย",   icon:"🍑", color:"#ffcba4"},
+  {key:"armR",   label:"แขนขวา",    icon:"🍑", color:"#ffd6b8"},
+  {key:"thighL", label:"ต้นขาซ้าย", icon:"🌷", color:"#c9a8e0"},
+  {key:"thighR", label:"ต้นขาขวา",  icon:"🌷", color:"#d4b8ec"}
 ];
-const SKEY="body-journal-records";
-const toCm=v=>+(v*2.54).toFixed(1);
-function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
-function fmtTH(s){if(!s)return"";const[y,m,d]=s.slice(0,10).split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});}
-function loadLocal(){try{const r=localStorage.getItem(SKEY);if(r)return JSON.parse(r);}catch(_){}return[];}
-function saveLocal(r){try{localStorage.setItem(SKEY,JSON.stringify(r));}catch(_){}}
+var SKEY = "body-journal-v1";
+function loadData(){try{var r=localStorage.getItem(SKEY);if(r)return JSON.parse(r);}catch(e){}return[];}
+function saveData(r){try{localStorage.setItem(SKEY,JSON.stringify(r));}catch(e){}}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function pad(n){return n<10?"0"+n:""+n;}
+function toCm(v){return Math.round(v*2.54*10)/10;}
+function fmtDate(s){if(!s)return"";var p=s.slice(0,10).split("-");var d=new Date(+p[0],+p[1]-1,+p[2]);return d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"});}
 
-const TIPS={
-chest:“❤️ รอบอก\n\n🏋️ ท่าออกกำลังกาย\n• Push-up 3 เซต x 15 ครั้ง เน้นหน้าอกล่าง\n• Dumbbell Chest Press นอนราบ 3 เซต x 12 ครั้ง\n• Cable Chest Fly หรือ Pec Deck 3 เซต x 15 ครั้ง\n\n🥗 การกิน\n• ลดแป้งขัดขาวและน้ำตาล แทนด้วยข้าวกล้อง\n• โปรตีนทุกมื้อ เช่น ไข่ขาว อกไก่ ปลา\n• หลีกเลี่ยงอาหารทอดและไขมันทรานส์\n\n💡 เพิ่มเติม\n• Cardio 30-45 นาที 4-5 วัน/สัปดาห์”,
-waist:“⚡ รอบเอว\n\n🏋️ ท่าออกกำลังกาย\n• Plank ค้างไว้ 30-60 วินาที x 4 เซต\n• Side Plank ซ้าย-ขวา ข้างละ 30 วินาที x 3 เซต\n• Bicycle Crunch 3 เซต x 20 ครั้ง\n• Russian Twist 3 เซต x 20 ครั้ง\n• Mountain Climber 3 เซต x 30 วินาที\n\n🥗 การกิน\n• ลดโซเดียม งดน้ำอัดลม\n• กินผักและใยอาหารมากขึ้น\n\n💡 เพิ่มเติม\n• นอนหลับ 7-8 ชม./คืน\n• HIIT 20-30 นาที 3 วัน/สัปดาห์”,
-hip:“✨ รอบสะโพก\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat 4 เซต x 15 ครั้ง\n• Hip Thrust 4 เซต x 12 ครั้ง\n• Side-lying Leg Raise 3 เซต x 20 ครั้ง/ข้าง\n• Donkey Kick 3 เซต x 15 ครั้ง/ข้าง\n\n🥗 การกิน\n• ลดอาหารไขมันสูง\n• เพิ่มโปรตีนและผักใบเขียว\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike 30 นาที\n• เดินขึ้นบันไดแทนลิฟต์”,
-armL:“💪 แขนซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n\n💡 เพิ่มเติม\n• ว่ายน้ำ Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Shadow Boxing กระชับแขนเร็วมาก”,
-armR:“💪 แขนขวา\n\n🏋️ ท่าออกกำลังกาย\n• Tricep Dip 3 เซต x 15 ครั้ง\n• Overhead Tricep Extension 3 เซต x 12 ครั้ง\n• Tricep Kickback 3 เซต x 15 ครั้ง\n• Bicep Curl 3 เซต x 12 ครั้ง\n\n🥗 การกิน\n• ลดแคลอรีโดยรวม 200-300 kcal/วัน\n• โปรตีน 1.2-1.6 กรัม/น้ำหนักตัว 1 กก.\n\n💡 เพิ่มเติม\n• ว่ายน้ำ Freestyle 30 นาที 3 ครั้ง/สัปดาห์\n• Shadow Boxing กระชับแขนเร็วมาก”,
-thighL:“🦵 ต้นขาซ้าย\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike\n• วิ่งหรือเดินเร็วขึ้นบันได”,
-thighR:“🦵 ต้นขาขวา\n\n🏋️ ท่าออกกำลังกาย\n• Sumo Squat กว้างๆ 4 เซต x 15 ครั้ง\n• Inner Thigh Squeeze 3 เซต x 20 ครั้ง\n• Side Lunge 3 เซต x 12 ครั้ง/ข้าง\n• Curtsy Lunge 3 เซต x 12 ครั้ง/ข้าง\n\n🥗 การกิน\n• ลดแป้งและน้ำตาลอย่างจริงจัง\n• ดื่มน้ำ 2.5-3 ลิตร/วัน\n\n💡 เพิ่มเติม\n• ปั่นจักรยาน Stationary Bike\n• วิ่งหรือเดินเร็วขึ้นบันได”,
+var TIPS = {
+chest:  “รอบอก:\n- Push-up 3x15\n- Dumbbell Press 3x12\n- ลดแป้ง น้ำตาล\n- Cardio 30 นาที/วัน”,
+waist:  “รอบเอว:\n- Plank 4x60 วิ\n- Bicycle Crunch 3x20\n- Russian Twist 3x20\n- ลดโซเดียม งดน้ำอัดลม”,
+hip:    “รอบสะโพก:\n- Sumo Squat 4x15\n- Hip Thrust 4x12\n- Donkey Kick 3x15\n- ปั่นจักรยาน 30 นาที”,
+armL:   “แขนซ้าย:\n- Tricep Dip 3x15\n- Overhead Extension 3x12\n- Bicep Curl 3x12\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
+armR:   “แขนขวา:\n- Tricep Dip 3x15\n- Overhead Extension 3x12\n- Bicep Curl 3x12\n- ว่ายน้ำ 3 ครั้ง/สัปดาห์”,
+thighL: “ต้นขาซ้าย:\n- Sumo Squat 4x15\n- Side Lunge 3x12\n- Curtsy Lunge 3x12\n- ปั่นจักรยาน ระดับแรงต้านสูง”,
+thighR: “ต้นขาขวา:\n- Sumo Squat 4x15\n- Side Lunge 3x12\n- Curtsy Lunge 3x12\n- ปั่นจักรยาน ระดับแรงต้านสูง”
 };
 
-let state={
-records:loadLocal(),
-view:“add”,
-form:{},
-note:””,
-selDate:todayStr(),
-selField:“waist”,
-summaryRec:null,
-advice:null,
-advLoading:false,
-showImport:false,
-importText:””,
-importErr:””,
-importOk:false,
-copied:false,
+var state = {
+records:loadData(), view:“add”, selDate:todayStr(),
+form:{}, note:””, selField:“waist”, summaryRec:null,
+advice:null, showImport:false, importText:””, copied:false
 };
 
-function setState(patch){Object.assign(state,patch);render();}
+// Colors
+var C = {
+bg1:“rgba(255,182,193,0.07)”, br1:“rgba(255,182,193,0.15)”,
+bg2:“rgba(232,160,191,0.1)”,  br2:“rgba(244,167,185,0.2)”,
+txt:”#f5e6f0”, sub:”#c4849c”, mute:”#a07090”, faint:”#7a5570”,
+grad:“linear-gradient(135deg,#e8a0bf,#c9a8e0)”,
+gradH:“linear-gradient(90deg,#f4a7b9,#c9a8e0)”,
+dark:”#1e1220”, pink:”#f4a7b9”, lav:”#c9a8e0”
+};
 
-function saveRecs(r){
-const s=[…r].sort((a,b)=>b.date.localeCompare(a.date));
-state.records=s;
-saveLocal(s);
-render();
-return s;
+function el(tag,opts){
+var e=document.createElement(tag);
+if(opts){
+if(opts.style)e.style.cssText=opts.style;
+if(opts.cls)e.className=opts.cls;
+if(opts.text)e.textContent=opts.text;
 }
-
-function h(tag,attrs,children){
-const el=document.createElement(tag);
-if(attrs)Object.entries(attrs).forEach(([k,v])=>{
-if(k===“style”&&typeof v===“object”)Object.assign(el.style,v);
-else if(k.startsWith(“on”))el.addEventListener(k.slice(2).toLowerCase(),v);
-else if(k===“className”)el.className=v;
-else if(k===“innerHTML”)el.innerHTML=v;
-else el.setAttribute(k,v);
-});
-if(children)([].concat(children)).forEach(c=>{
-if(c==null||c===false)return;
-el.appendChild(typeof c===“string”?document.createTextNode(c):c);
-});
-return el;
+return e;
 }
-
-function diffBadge(val,base){
-if(val==null||base==null)return null;
-const diff=+(val-base).toFixed(2);
-const isDown=diff<0,isZero=diff===0;
-const lbl=isZero?“ไม่เปลี่ยน”:`${Math.abs(diff)}" / ${Math.abs(toCm(diff))} ซม.`;
-const cls=isZero?“diff-zero”:isDown?“diff-down”:“diff-up”;
-const sym=isZero?”—”:isDown?“▼ “:“▲ “;
-return h(“div”,{className:“diff-badge “+cls},sym+lbl);
+function card(extra){
+var d=document.createElement(“div”);
+d.style.cssText=“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:16px;padding:14px 16px;margin-bottom:10px;”+(extra||””);
+return d;
 }
-
-function compareSection(title,recA,recB,labelA,labelB){
-if(!recA||!recB)return null;
-const rows=FIELDS.map(f=>{
-const vA=recA[f.key],vB=recB[f.key];
-if(vA==null&&vB==null)return null;
-const row=h(“div”,{className:“compare-row”},[
-h(“span”,{style:{fontSize:“14px”,width:“20px”}},f.icon),
-h(“div”,{style:{fontSize:“12px”,color:”#c0b8e8”,flex:“1”}},f.label),
-h(“div”,{style:{fontSize:“12px”,color:”#7a6fb0”}},vA!=null?`${vA}"`:”—”),
-h(“div”,{style:{fontSize:“11px”,color:”#4a4a7a”}},“→”),
-h(“div”,{style:{fontSize:“12px”,color:f.color,fontWeight:“700”}},vB!=null?`${vB}"`:”—”),
-diffBadge(vB,vA),
-].filter(Boolean));
-return row;
-}).filter(Boolean);
-
-return h(“div”,{className:“compare-box”},[
-h(“div”,{className:“compare-title”},title),
-h(“div”,{className:“compare-dates”},[
-h(“div”,{className:“compare-date-col”},[
-h(“div”,{className:“compare-date-label”},labelA),
-h(“div”,{className:“compare-date-val”},fmtTH(recA.date)),
-]),
-h(“div”,{style:{display:“flex”,alignItems:“center”,color:”#4a4a7a”}},“→”),
-h(“div”,{className:“compare-date-col”},[
-h(“div”,{className:“compare-date-label”},labelB),
-h(“div”,{className:“compare-date-val”},fmtTH(recB.date)),
-]),
-]),
-…rows,
-]);
-}
-
-function renderAdd(){
-const els=[];
-// date
-const dateInput=h(“input”,{type:“date”,value:state.selDate,style:{background:“transparent”,border:“none”,outline:“none”,color:”#c8b8ff”,fontSize:“15px”,fontWeight:“600”,fontFamily:“inherit”,width:“100%”,colorScheme:“dark”}});
-dateInput.addEventListener(“change”,e=>state.selDate=e.target.value);
-els.push(h(“div”,{className:“card”,style:{display:“flex”,alignItems:“center”,gap:“10px”}},[
-h(“span”,{style:{fontSize:“18px”}},“📅”),
-h(“div”,{style:{flex:“1”}},[
-h(“div”,{className:“field-label”},“วันที่บันทึก”),
-dateInput,
-]),
-]));
-els.push(h(“div”,{style:{fontSize:“11px”,color:”#7a6fb0”,margin:“4px 0 10px”}},“กรอกค่าเป็นนิ้ว — แปลงเป็น ซม. ให้อัตโนมัติ”));
-
-FIELDS.forEach(f=>{
-const inp=h(“input”,{type:“number”,placeholder:“นิ้ว”,className:“field-input”});
-if(state.form[f.key])inp.value=state.form[f.key];
-const preview=h(“div”,{style:{textAlign:“right”,display:state.form[f.key]?“block”:“none”}},[
-h(“div”,{className:“field-in”,style:{color:f.color}},`${state.form[f.key]}"`),
-h(“div”,{className:“field-cm”},`${toCm(parseFloat(state.form[f.key]||0))} ซม.`),
-]);
-inp.addEventListener(“input”,e=>{
-state.form[f.key]=e.target.value;
-preview.style.display=e.target.value?“block”:“none”;
-preview.querySelector(”.field-in”).textContent=`${e.target.value}"`;
-preview.querySelector(”.field-cm”).textContent=`${toCm(parseFloat(e.target.value||0))} ซม.`;
-});
-els.push(h(“div”,{className:“card”,style:{display:“flex”,alignItems:“center”,gap:“12px”}},[
-h(“span”,{style:{fontSize:“20px”}},f.icon),
-h(“div”,{style:{flex:“1”}},[h(“div”,{className:“field-label”},f.label),inp]),
-preview,
-]));
-});
-
-const ta=h(“textarea”,{placeholder:“โน้ตเพิ่มเติม”,rows:“2”});
-ta.value=state.note;
-ta.addEventListener(“input”,e=>state.note=e.target.value);
-els.push(ta);
-els.push(h(“button”,{className:“btn-main”,onClick:handleAdd},“บันทึก & ดูสรุป”));
-return els;
-}
-
-function handleAdd(){
-if(!FIELDS.some(f=>state.form[f.key]))return;
-const entry={id:Date.now(),date:state.selDate,note:state.note,
-…Object.fromEntries(FIELDS.map(f=>[f.key,state.form[f.key]?parseFloat(state.form[f.key]):null]))};
-saveRecs([…state.records,entry]);
-setState({form:{},note:””,summaryRec:entry,view:“summary”});
-}
-
-function renderSummary(){
-if(!state.summaryRec)return[];
-const rows=FIELDS.filter(f=>state.summaryRec[f.key]!=null).map(f=>
-h(“div”,{className:“summary-row”},[
-h(“div”,{style:{display:“flex”,alignItems:“center”,gap:“8px”}},[
-h(“span”,{},f.icon),h(“span”,{style:{fontSize:“13px”,color:”#c0b8e8”}},f.label)
-]),
-h(“div”,{style:{textAlign:“right”}},[
-h(“div”,{style:{fontSize:“17px”,fontWeight:“700”,color:f.color}},`${state.summaryRec[f.key]}"`),
-h(“div”,{style:{fontSize:“11px”,color:”#7a6fb0”}},`= ${toCm(state.summaryRec[f.key])} ซม.`),
-]),
-])
-);
-return[
-h(“div”,{className:“summary-box”},[
-h(“div”,{className:“summary-title”},“สรุปการบันทึก”),
-h(“div”,{className:“summary-date”},`📅 ${fmtTH(state.summaryRec.date)}`),
-…rows,
-]),
-h(“button”,{className:“btn-outline”,onClick:()=>setState({view:“add”})},”+ บันทึกครั้งใหม่”),
-];
-}
-
-function renderCompare(){
-const {records}=state;
-if(records.length<2)return[h(“div”,{className:“empty”},[h(“div”,{className:“empty-icon”},“⚖️”),h(“div”,{},“ต้องมีบันทึกอย่างน้อย 2 ครั้ง”)])];
-const latest=records[0],prev=records[1],first=records[records.length-1];
-const inc=FIELDS.filter(f=>prev[f.key]!=null&&latest[f.key]!=null&&latest[f.key]>prev[f.key]);
-
-const advBtn=h(“button”,{className:“btn-main”,style:{marginBottom:“14px”},onClick:()=>{
-if(!inc.length){setState({advice:“🎉 ดีมาก! ไม่มีค่าใดเพิ่มขึ้นเลย”});return;}
-setState({advLoading:true,advice:null});
-setTimeout(()=>setState({advice:inc.map(f=>TIPS[f.key]).join(”\n\n”),advLoading:false}),500);
-}},state.advLoading?“🤔 กำลังวิเคราะห์…”:“✨ ขอคำแนะนำ”);
-
-const els=[
-h(“div”,{className:“legend”},[h(“span”,{},“🟢 ลดลง”),h(“span”,{},“🔴 เพิ่มขึ้น”)]),
-compareSection(“ล่าสุด vs ก่อนหน้า”,prev,latest,“ครั้งก่อน”,“ล่าสุด”),
-records.length>2?compareSection(“ล่าสุด vs ครั้งแรกสุด”,first,latest,“ครั้งแรก”,“ล่าสุด”):null,
-advBtn,
-].filter(Boolean);
-
-if(state.advice)els.push(h(“div”,{className:“advice-box”},[
-h(“div”,{className:“advice-title”},“💡 คำแนะนำ”),
-h(“div”,{className:“advice-text”},state.advice),
-]));
-return els;
-}
-
-function renderHistory(){
-const copyBtn=h(“button”,{className:“btn-copy”+(state.copied?” copied”:””),onClick:()=>{
-const j=JSON.stringify(state.records,null,2);
-navigator.clipboard.writeText(j).catch(()=>{const t=document.createElement(“textarea”);t.value=j;document.body.appendChild(t);t.select();document.execCommand(“copy”);document.body.removeChild(t);});
-setState({copied:true});setTimeout(()=>setState({copied:false}),2500);
-}},state.copied?“✅ คัดลอกแล้ว! ไปวางใน Notes ได้เลย”:“📋 Copy ข้อมูลทั้งหมด”);
-
-const importBtn=h(“button”,{className:“btn-import”,onClick:()=>setState({showImport:!state.showImport,importErr:””})},
-“📥 Import JSON (กู้ข้อมูล)”);
-
-const els=[
-h(“div”,{className:“backup-box”},[
-h(“div”,{className:“backup-title”},“💾 สำรองข้อมูล”),
-copyBtn,
-h(“div”,{className:“backup-hint”},“วิธีใช้: กด Copy → เปิด Notes → วางข้อความ → บันทึก”),
-]),
-importBtn,
-];
-
-if(state.importOk)els.push(h(“div”,{className:“import-ok”},“✅ นำเข้าสำเร็จ!”));
-
-if(state.showImport){
-const ta=h(“textarea”,{className:“import-ta”,rows:“5”,placeholder:’[{“date”:“2026-04-18”,…}]’});
-ta.value=state.importText;
-ta.addEventListener(“input”,e=>state.importText=e.target.value);
-const doImport=h(“button”,{className:“btn-import-do”,onClick:()=>{
-state.importErr=””;
-try{
-const data=JSON.parse(state.importText);
-if(!Array.isArray(data))throw new Error();
-const cleaned=data.map(r=>({
-id:r.id||Date.now()+Math.random(),
-date:(r.date||todayStr()).slice(0,10),note:r.note||””,
-…Object.fromEntries(FIELDS.map(f=>[f.key,r[f.key]!=null?parseFloat(r[f.key]):null]))
-}));
-const ids=new Set(state.records.map(r=>r.id));
-saveRecs([…state.records,…cleaned.filter(r=>!ids.has(r.id))]);
-setState({importText:””,showImport:false,importOk:true});
-setTimeout(()=>setState({importOk:false}),3000);
-}catch(_){setState({importErr:“JSON ไม่ถูกต้อง”});}
-}},“นำเข้าข้อมูล”);
-const importBox=h(“div”,{className:“import-box”},[
-h(“div”,{className:“import-hint”},“วาง JSON ที่ Copy ไว้ตรงนี้”),
-ta,
-state.importErr?h(“div”,{className:“import-err”},`⚠️ ${state.importErr}`):null,
-doImport,
-].filter(Boolean));
-els.push(importBox);
-}
-
-if(!state.records.length)els.push(h(“div”,{className:“empty”},[h(“div”,{className:“empty-icon”},“📋”),h(“div”,{},“ยังไม่มีบันทึก”)]));
-
-state.records.forEach(rec=>{
-const rows=FIELDS.filter(f=>rec[f.key]!=null).map(f=>
-h(“div”,{className:“rec-row”,style:{background:f.color+“12”}},[
-h(“div”,{className:“rec-label”},[h(“span”,{},f.icon),f.label]),
-h(“div”,{},[
-h(“span”,{className:“rec-val”,style:{color:f.color}},`${rec[f.key]}"`),
-h(“span”,{className:“rec-cm”},`(${toCm(rec[f.key])} ซม.)`),
-]),
-])
-);
-const card=h(“div”,{className:“rec-card”},[
-h(“div”,{className:“rec-header”},[
-h(“div”,{className:“rec-date”},`📅 ${fmtTH(rec.date)}`),
-h(“button”,{className:“btn-del”,onClick:()=>{saveRecs(state.records.filter(r=>r.id!==rec.id));render();}},“ลบ”),
-]),
-…rows,
-rec.note?h(“div”,{style:{marginTop:“8px”,fontSize:“13px”,color:”#7a6fb0”,fontStyle:“italic”}},`"${rec.note}"`):null,
-].filter(Boolean));
-els.push(card);
-});
-return els;
-}
-
-function renderChart(){
-const f=FIELDS.find(f=>f.key===state.selField)||FIELDS[0];
-const tabs=h(“div”,{className:“chart-tabs”},FIELDS.map(fi=>{
-const btn=h(“button”,{className:“chart-tab”+(fi.key===state.selField?” active”:””),style:{”–fc”:fi.color},onClick:()=>setState({selField:fi.key})},`${fi.icon} ${fi.label}`);
-if(fi.key===state.selField)btn.style.color=fi.color;
-return btn;
-}));
-
-const cData=state.records.filter(r=>r[state.selField]!=null).slice(0,10).reverse();
-if(!cData.length)return[tabs,h(“div”,{className:“empty”},[h(“div”,{className:“empty-icon”},“📊”),h(“div”,{},“ยังไม่มีข้อมูล”)])];
-
-const cMax=Math.max(…cData.map(r=>r[state.selField]))+2;
-const cMin=Math.max(0,Math.min(…cData.map(r=>r[state.selField]))-2);
-const last=cData[cData.length-1];
-const first2=cData[0];
-const diff=cData.length>1?+(last[state.selField]-first2[state.selField]).toFixed(2):null;
-
-const vw=Math.max(cData.length,1)*52;
-const svg=document.createElementNS(“http://www.w3.org/2000/svg”,“svg”);
-svg.setAttribute(“width”,“100%”);svg.setAttribute(“height”,“120”);
-svg.setAttribute(“viewBox”,`0 0 ${vw} 120`);
-svg.style.marginTop=“14px”;svg.style.overflow=“visible”;
-
-cData.forEach((r,i)=>{
-const x=i*52+26,y=95-((r[state.selField]-cMin)/Math.max(cMax-cMin,0.1))*80;
-const next=cData[i+1];
-if(next){
-const nx=(i+1)*52+26,ny=95-((next[state.selField]-cMin)/Math.max(cMax-cMin,0.1))*80;
-const line=document.createElementNS(“http://www.w3.org/2000/svg”,“line”);
-line.setAttribute(“x1”,x);line.setAttribute(“y1”,y);line.setAttribute(“x2”,nx);line.setAttribute(“y2”,ny);
-line.setAttribute(“stroke”,f.color);line.setAttribute(“stroke-width”,“2”);line.setAttribute(“stroke-opacity”,“0.7”);
-svg.appendChild(line);
-}
-const circle=document.createElementNS(“http://www.w3.org/2000/svg”,“circle”);
-circle.setAttribute(“cx”,x);circle.setAttribute(“cy”,y);circle.setAttribute(“r”,“5”);circle.setAttribute(“fill”,f.color);
-svg.appendChild(circle);
-const t1=document.createElementNS(“http://www.w3.org/2000/svg”,“text”);
-t1.setAttribute(“x”,x);t1.setAttribute(“y”,“114”);t1.setAttribute(“text-anchor”,“middle”);t1.setAttribute(“font-size”,“9”);t1.setAttribute(“fill”,”#6b5fa0”);t1.textContent=fmtTH(r.date).slice(0,5);
-svg.appendChild(t1);
-const t2=document.createElementNS(“http://www.w3.org/2000/svg”,“text”);
-t2.setAttribute(“x”,x);t2.setAttribute(“y”,y-9);t2.setAttribute(“text-anchor”,“middle”);t2.setAttribute(“font-size”,“9”);t2.setAttribute(“fill”,f.color);t2.textContent=`${r[state.selField]}"`;
-svg.appendChild(t2);
-});
-
-const chartBox=h(“div”,{className:“chart-box”},[
-h(“div”,{className:“chart-label”},`${f.label} — ล่าสุด`),
-h(“div”,{style:{display:“flex”,alignItems:“baseline”,gap:“10px”,flexWrap:“wrap”}},[
-h(“div”,{className:“chart-val”,style:{color:f.color}},`${last[state.selField]}"`),
-h(“div”,{style:{fontSize:“15px”,color:”#9c8fd4”}},`= ${toCm(last[state.selField])} ซม.`),
-diff!=null?h(“span”,{style:{fontSize:“13px”,color:diff<=0?”#81c784”:”#e57373”}},`${diff>0?"▲":"▼"} ${Math.abs(diff)}"`):null,
-].filter(Boolean)),
-svg,
-]);
-
-const maxV=Math.max(…cData.map(r=>r[state.selField]));
-const minV=Math.min(…cData.map(r=>r[state.selField]));
-const stats=h(“div”,{className:“chart-stats”},[
-h(“div”,{className:“chart-stat”},[h(“div”,{className:“chart-stat-label”},“สูงสุด”),h(“div”,{className:“chart-stat-val”,style:{color:f.color}},`${maxV}"`),h(“div”,{className:“chart-stat-cm”},`${toCm(maxV)} ซม.`)]),
-h(“div”,{className:“chart-stat”},[h(“div”,{className:“chart-stat-label”},“ต่ำสุด”),h(“div”,{className:“chart-stat-val”,style:{color:f.color}},`${minV}"`),h(“div”,{className:“chart-stat-cm”},`${toCm(minV)} ซม.`)]),
-]);
-
-return[tabs,chartBox,stats];
+function mainBtn(txt){
+var b=el(“button”,{style:“width:100%;padding:16px;border:none;border-radius:16px;cursor:pointer;background:”+C.grad+”;color:”+C.dark+”;font-size:16px;font-weight:700;font-family:inherit;box-shadow:0 6px 20px rgba(232,160,191,0.3)”,text:txt});
+return b;
 }
 
 function render(){
-const app=document.getElementById(“app”);
+var app=document.getElementById(“app”);
 app.innerHTML=””;
 
-// header
-const syncEl=null;
-app.appendChild(h(“div”,{className:“header”},[
-h(“div”,{className:“header-sub”},“Body Journal”),
-h(“h1”,{},“สัดส่วนร่างกาย”),
-h(“div”,{className:“header-meta”},[
-h(“div”,{},state.records.length>0?`บันทึกแล้ว ${state.records.length} ครั้ง`:“ยังไม่มีข้อมูล”),
-syncEl,
-].filter(Boolean)),
-]));
+// Header
+var hdr=el(“div”,{style:“padding:28px 20px 14px”});
+hdr.appendChild(el(“div”,{style:“font-size:11px;letter-spacing:3px;color:”+C.sub+”;text-transform:uppercase;margin-bottom:4px”,text:“Body Journal”}));
+var h1=el(“div”,{style:“font-size:26px;font-weight:700;background:”+C.gradH+”;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px”,text:“สัดส่วนร่างกาย”});
+hdr.appendChild(h1);
+hdr.appendChild(el(“div”,{style:“font-size:12px;color:”+C.mute,text:state.records.length>0?“บันทึกแล้ว “+state.records.length+” ครั้ง”:“ยังไม่มีข้อมูล”}));
+app.appendChild(hdr);
 
-// nav
-const tabs=[{k:“add”,l:“บันทึก”},{k:“compare”,l:“เทียบ”},{k:“history”,l:“ประวัติ”},{k:“chart”,l:“กราฟ”}];
-app.appendChild(h(“div”,{className:“nav”},tabs.map(t=>
-h(“button”,{className:state.view===t.k?“active”:””,onClick:()=>setState({view:t.k})},t.l)
-)));
+// Nav
+var nav=el(“div”,{style:“display:flex;margin:0 20px 16px;background:rgba(255,182,193,0.07);border-radius:16px;padding:4px;gap:2px”});
+[{k:“add”,l:“บันทึก”},{k:“compare”,l:“เทียบ”},{k:“history”,l:“ประวัติ”},{k:“chart”,l:“กราฟ”}].forEach(function(t){
+var active=state.view===t.k;
+var b=el(“button”,{style:“flex:1;padding:9px 0;border:none;border-radius:12px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:”+(active?“700”:“400”)+”;background:”+(active?C.grad:“transparent”)+”;color:”+(active?C.dark:C.mute),text:t.l});
+b.onclick=function(){state.view=t.k;render();};
+nav.appendChild(b);
+});
+app.appendChild(nav);
 
-// view
-const view=h(“div”,{className:“view”});
-let els=[];
-if(state.view===“add”)els=renderAdd();
-else if(state.view===“summary”)els=renderSummary();
-else if(state.view===“compare”)els=renderCompare();
-else if(state.view===“history”)els=renderHistory();
-else if(state.view===“chart”)els=renderChart();
-els.filter(Boolean).forEach(el=>view.appendChild(el));
-app.appendChild(view);
+var c=el(“div”,{style:“padding:0 20px”});
+if(state.view===“add”)renderAdd(c);
+else if(state.view===“summary”)renderSummary(c);
+else if(state.view===“compare”)renderCompare(c);
+else if(state.view===“history”)renderHistory(c);
+else if(state.view===“chart”)renderChart(c);
+app.appendChild(c);
 }
 
-// init
-try {
+function renderAdd(c){
+var dw=card(“display:flex;align-items:center;gap:10px”);
+dw.appendChild(el(“span”,{style:“font-size:18px”,text:“📅”}));
+var dd=el(“div”,{style:“flex:1”});
+dd.appendChild(el(“div”,{style:“font-size:11px;color:”+C.sub+”;margin-bottom:2px”,text:“วันที่บันทึก”}));
+var di=document.createElement(“input”);
+di.type=“date”; di.value=state.selDate;
+di.style.cssText=“background:transparent;border:none;outline:none;color:”+C.pink+”;font-size:15px;font-weight:600;font-family:inherit;width:100%;color-scheme:dark”;
+di.onchange=function(){state.selDate=this.value;};
+dd.appendChild(di); dw.appendChild(dd); c.appendChild(dw);
+c.appendChild(el(“div”,{style:“font-size:11px;color:”+C.mute+”;margin:4px 0 10px”,text:“กรอกค่าเป็นนิ้ว — แปลงเป็น ซม. อัตโนมัติ”}));
+
+FIELDS.forEach(function(f){
+var w=card(“display:flex;align-items:center;gap:12px”);
+w.appendChild(el(“span”,{style:“font-size:20px”,text:f.icon}));
+var iw=el(“div”,{style:“flex:1”});
+iw.appendChild(el(“div”,{style:“font-size:12px;color:”+C.sub+”;margin-bottom:4px”,text:f.label}));
+var inp=document.createElement(“input”);
+inp.type=“number”; inp.placeholder=“นิ้ว”;
+inp.style.cssText=“background:transparent;border:none;outline:none;color:”+C.txt+”;font-size:22px;font-weight:600;font-family:inherit;width:100%”;
+if(state.form[f.key])inp.value=state.form[f.key];
+iw.appendChild(inp); w.appendChild(iw);
+var pv=el(“div”,{style:“text-align:right;display:”+(state.form[f.key]?“block”:“none”)});
+var pIn=el(“div”,{style:“font-size:14px;font-weight:700;color:”+f.color,text:(state.form[f.key]||””)+’”’});
+var pCm=el(“div”,{style:“font-size:11px;color:”+C.mute,text:toCm(parseFloat(state.form[f.key]||0))+” ซม.”});
+pv.appendChild(pIn); pv.appendChild(pCm); w.appendChild(pv);
+inp.oninput=function(){
+state.form[f.key]=this.value;
+pv.style.display=this.value?“block”:“none”;
+pIn.textContent=this.value+’”’;
+pCm.textContent=toCm(parseFloat(this.value||0))+” ซม.”;
+};
+c.appendChild(w);
+});
+
+var ta=document.createElement(“textarea”);
+ta.placeholder=“โน้ตเพิ่มเติม”; ta.rows=2;
+ta.style.cssText=“width:100%;background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:14px;padding:14px 16px;color:#e8c4d4;font-size:14px;font-family:inherit;resize:none;outline:none;margin-bottom:16px”;
+ta.value=state.note; ta.oninput=function(){state.note=this.value;}; c.appendChild(ta);
+var btn=mainBtn(“บันทึก & ดูสรุป”);
+btn.onclick=function(){
+if(!FIELDS.some(function(f){return state.form[f.key];}))return;
+var entry={id:Date.now(),date:state.selDate,note:state.note};
+FIELDS.forEach(function(f){entry[f.key]=state.form[f.key]?parseFloat(state.form[f.key]):null;});
+var recs=state.records.concat([entry]);
+recs.sort(function(a,b){return b.date.localeCompare(a.date);});
+state.records=recs; saveData(recs);
+state.form={}; state.note=””; state.summaryRec=entry; state.view=“summary”; render();
+};
+c.appendChild(btn);
+}
+
+function renderSummary(c){
+if(!state.summaryRec)return;
+var box=el(“div”,{style:“background:”+C.bg2+”;border:1px solid “+C.br2+”;border-radius:20px;padding:20px;margin-bottom:16px”});
+box.appendChild(el(“div”,{style:“font-size:11px;color:”+C.sub+”;letter-spacing:2px;margin-bottom:4px”,text:“สรุปการบันทึก”}));
+box.appendChild(el(“div”,{style:“font-size:18px;font-weight:700;color:”+C.pink+”;margin-bottom:14px”,text:“📅 “+fmtDate(state.summaryRec.date)}));
+FIELDS.forEach(function(f){
+if(state.summaryRec[f.key]==null)return;
+var row=el(“div”,{style:“background:rgba(255,182,193,0.07);border-radius:12px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between”});
+var lbl=el(“div”,{style:“display:flex;align-items:center;gap:8px”});
+lbl.appendChild(el(“span”,{text:f.icon}));
+lbl.appendChild(el(“span”,{style:“font-size:13px;color:#e8c4d4”,text:f.label}));
+row.appendChild(lbl);
+var val=el(“div”,{style:“text-align:right”});
+val.appendChild(el(“div”,{style:“font-size:17px;font-weight:700;color:”+f.color,text:state.summaryRec[f.key]+’”’}));
+val.appendChild(el(“div”,{style:“font-size:11px;color:”+C.mute,text:”= “+toCm(state.summaryRec[f.key])+” ซม.”}));
+row.appendChild(val); box.appendChild(row);
+});
+c.appendChild(box);
+var btn=el(“button”,{style:“width:100%;padding:14px;border:1px solid “+C.br2+”;border-radius:14px;background:transparent;color:”+C.pink+”;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer”,text:”+ บันทึกครั้งใหม่”});
+btn.onclick=function(){state.view=“add”;render();}; c.appendChild(btn);
+}
+
+function cmpSection(title,recA,recB,lblA,lblB){
+var box=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:16px;padding:16px;margin-bottom:14px”});
+box.appendChild(el(“div”,{style:“font-size:11px;letter-spacing:2px;color:”+C.sub+”;margin-bottom:10px;text-transform:uppercase”,text:title}));
+var dates=el(“div”,{style:“display:flex;justify-content:space-between;margin-bottom:12px”});
+var dA=el(“div”,{style:“text-align:center;flex:1”});
+dA.appendChild(el(“div”,{style:“font-size:10px;color:”+C.mute,text:lblA}));
+dA.appendChild(el(“div”,{style:“font-size:12px;font-weight:700;color:”+C.pink,text:fmtDate(recA.date)}));
+dates.appendChild(dA);
+dates.appendChild(el(“div”,{style:“display:flex;align-items:center;color:”+C.faint,text:“→”}));
+var dB=el(“div”,{style:“text-align:center;flex:1”});
+dB.appendChild(el(“div”,{style:“font-size:10px;color:”+C.mute,text:lblB}));
+dB.appendChild(el(“div”,{style:“font-size:12px;font-weight:700;color:”+C.pink,text:fmtDate(recB.date)}));
+dates.appendChild(dB); box.appendChild(dates);
+FIELDS.forEach(function(f){
+var vA=recA[f.key],vB=recB[f.key];
+if(vA==null&&vB==null)return;
+var row=el(“div”,{style:“display:flex;align-items:center;padding:8px 10px;margin-bottom:5px;background:rgba(255,182,193,0.05);border-radius:10px;gap:6px”});
+row.appendChild(el(“span”,{style:“font-size:14px;width:20px”,text:f.icon}));
+row.appendChild(el(“div”,{style:“font-size:12px;color:#e8c4d4;flex:1”,text:f.label}));
+row.appendChild(el(“div”,{style:“font-size:12px;color:”+C.mute,text:vA!=null?vA+’”’:”—”}));
+row.appendChild(el(“div”,{style:“font-size:11px;color:”+C.faint,text:“→”}));
+row.appendChild(el(“div”,{style:“font-size:12px;color:”+f.color+”;font-weight:700”,text:vB!=null?vB+’”’:”—”}));
+if(vA!=null&&vB!=null){
+var diff=Math.round((vB-vA)*100)/100;
+var isZ=diff===0,isD=diff<0;
+var bs=“font-size:11px;font-weight:700;padding:3px 7px;border-radius:7px;white-space:nowrap;”;
+if(isZ)bs+=“color:”+C.mute+”;background:rgba(160,112,144,0.1)”;
+else if(isD)bs+=“color:#a8d8b0;background:rgba(168,216,176,0.12)”;
+else bs+=“color:#f4a7b9;background:rgba(244,167,185,0.15)”;
+row.appendChild(el(“div”,{style:bs,text:isZ?”—”:(isD?“▼ “:“▲ “)+Math.abs(diff)+’” / ’+Math.abs(toCm(diff))+” ซม.”}));
+}
+box.appendChild(row);
+});
+return box;
+}
+
+function renderCompare(c){
+var recs=state.records;
+if(recs.length<2){
+var e=el(“div”,{style:“text-align:center;padding:60px 0;color:”+C.mute});
+e.appendChild(el(“div”,{style:“font-size:48px;margin-bottom:12px”,text:“⚖️”}));
+e.appendChild(el(“div”,{text:“ต้องมีบันทึกอย่างน้อย 2 ครั้ง”}));
+c.appendChild(e); return;
+}
+var latest=recs[0],prev=recs[1],first=recs[recs.length-1];
+var lg=el(“div”,{style:“background:rgba(255,182,193,0.05);border-radius:12px;padding:8px 14px;margin-bottom:14px;font-size:12px;color:”+C.mute+”;display:flex;gap:14px”});
+lg.appendChild(el(“span”,{text:“🟢 ลดลง”})); lg.appendChild(el(“span”,{text:“🔴 เพิ่มขึ้น”})); c.appendChild(lg);
+c.appendChild(cmpSection(“ล่าสุด vs ก่อนหน้า”,prev,latest,“ครั้งก่อน”,“ล่าสุด”));
+if(recs.length>2)c.appendChild(cmpSection(“ล่าสุด vs ครั้งแรกสุด”,first,latest,“ครั้งแรก”,“ล่าสุด”));
+var ab=mainBtn(state.advice?“✨ ขอคำแนะนำใหม่”:“✨ ขอคำแนะนำ”);
+ab.style.marginTop=“4px”;
+ab.onclick=function(){
+var inc=FIELDS.filter(function(f){return prev[f.key]!=null&&latest[f.key]!=null&&latest[f.key]>prev[f.key];});
+if(!inc.length){state.advice=“🎉 ดีมาก! ไม่มีค่าใดเพิ่มขึ้นเลย”;render();return;}
+state.advice=inc.map(function(f){return TIPS[f.key]||f.label;}).join(”\n\n”); render();
+}; c.appendChild(ab);
+if(state.advice){
+var abox=el(“div”,{style:“background:”+C.bg2+”;border:1px solid “+C.br2+”;border-radius:16px;padding:18px;margin-top:12px”});
+abox.appendChild(el(“div”,{style:“font-size:11px;letter-spacing:2px;color:”+C.sub+”;margin-bottom:10px;text-transform:uppercase”,text:“💡 คำแนะนำ”}));
+abox.appendChild(el(“div”,{style:“font-size:14px;color:#e8c4d4;line-height:1.7;white-space:pre-wrap”,text:state.advice}));
+c.appendChild(abox);
+}
+}
+
+function renderHistory(c){
+var bk=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:16px;padding:14px 16px;margin-bottom:14px”});
+bk.appendChild(el(“div”,{style:“font-size:11px;letter-spacing:2px;color:”+C.sub+”;margin-bottom:10px;text-transform:uppercase”,text:“💾 สำรองข้อมูล”}));
+var cp=el(“button”,{style:“width:100%;padding:13px;border:none;border-radius:12px;background:”+C.grad+”;color:”+C.dark+”;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px”,text:state.copied?“✅ คัดลอกแล้ว! ไปวางใน Notes ได้เลย”:“📋 Copy ข้อมูลทั้งหมด”});
+cp.onclick=function(){
+var j=JSON.stringify(state.records,null,2);
+if(navigator.clipboard)navigator.clipboard.writeText(j);
+else{var t=document.createElement(“textarea”);t.value=j;document.body.appendChild(t);t.select();document.execCommand(“copy”);document.body.removeChild(t);}
+state.copied=true;render();setTimeout(function(){state.copied=false;render();},2500);
+}; bk.appendChild(cp);
+bk.appendChild(el(“div”,{style:“font-size:12px;color:”+C.mute+”;line-height:1.6”,text:“วิธีใช้: กด Copy → เปิด Notes → วางข้อความ → บันทึก”}));
+c.appendChild(bk);
+
+var ib=el(“button”,{style:“width:100%;padding:11px;border:1px solid “+C.br1+”;border-radius:12px;background:”+(state.showImport?C.bg2:“transparent”)+”;color:”+C.pink+”;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:14px”,text:“📥 Import JSON (กู้ข้อมูล)”});
+ib.onclick=function(){state.showImport=!state.showImport;render();}; c.appendChild(ib);
+
+if(state.showImport){
+var ibox=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:14px;padding:14px;margin-bottom:14px”});
+ibox.appendChild(el(“div”,{style:“font-size:12px;color:”+C.pink+”;margin-bottom:8px”,text:“วาง JSON ที่ Copy ไว้ตรงนี้”}));
+var ita=document.createElement(“textarea”); ita.rows=5;
+ita.style.cssText=“width:100%;background:rgba(30,18,32,0.5);border:1px solid “+C.br1+”;border-radius:10px;padding:10px 12px;color:#e8c4d4;font-size:12px;font-family:monospace;resize:none;outline:none;margin-bottom:8px”;
+ita.value=state.importText; ita.oninput=function(){state.importText=this.value;}; ibox.appendChild(ita);
+var di=el(“button”,{style:“width:100%;padding:11px;border:none;border-radius:10px;background:”+C.grad+”;color:”+C.dark+”;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer”,text:“นำเข้าข้อมูล”});
+di.onclick=function(){
+try{
+var data=JSON.parse(state.importText);
+if(!Array.isArray(data))throw new Error();
+var ids={};state.records.forEach(function(r){ids[r.id]=true;});
+var merged=state.records.concat(data.filter(function(r){return!ids[r.id];}));
+merged.sort(function(a,b){return b.date.localeCompare(a.date);});
+state.records=merged;saveData(merged);state.importText=””;state.showImport=false;render();
+}catch(e){alert(“JSON ไม่ถูกต้อง”);}
+}; ibox.appendChild(di); c.appendChild(ibox);
+}
+
+if(!state.records.length){
+var e=el(“div”,{style:“text-align:center;padding:60px 0;color:”+C.mute});
+e.appendChild(el(“div”,{style:“font-size:48px”,text:“📋”}));
+e.appendChild(el(“div”,{text:“ยังไม่มีบันทึก”})); c.appendChild(e); return;
+}
+state.records.forEach(function(rec){
+var rc=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:16px;padding:16px;margin-bottom:12px”});
+var rh=el(“div”,{style:“display:flex;justify-content:space-between;align-items:center;margin-bottom:10px”});
+rh.appendChild(el(“div”,{style:“font-size:14px;font-weight:700;color:”+C.pink,text:“📅 “+fmtDate(rec.date)}));
+var del=el(“button”,{style:“background:rgba(244,167,185,0.1);border:1px solid rgba(244,167,185,0.25);border-radius:8px;color:”+C.pink+”;font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit”,text:“ลบ”});
+del.onclick=(function(id){return function(){state.records=state.records.filter(function(r){return r.id!==id;});saveData(state.records);render();};})(rec.id);
+rh.appendChild(del); rc.appendChild(rh);
+FIELDS.forEach(function(f){
+if(rec[f.key]==null)return;
+var row=el(“div”,{style:“display:flex;align-items:center;justify-content:space-between;background:”+f.color+“18;border-radius:10px;padding:7px 12px;margin-bottom:5px”});
+var lbl=el(“div”,{style:“display:flex;align-items:center;gap:8px;font-size:13px;color:#e8c4d4”});
+lbl.appendChild(el(“span”,{text:f.icon})); lbl.appendChild(el(“span”,{text:f.label})); row.appendChild(lbl);
+var val=el(“div”,{});
+val.appendChild(el(“span”,{style:“font-weight:700;color:”+f.color+”;font-size:14px”,text:rec[f.key]+’”’}));
+val.appendChild(el(“span”,{style:“font-size:11px;color:”+C.mute+”;margin-left:6px”,text:”(”+toCm(rec[f.key])+” ซม.)”}));
+row.appendChild(val); rc.appendChild(row);
+});
+if(rec.note)rc.appendChild(el(“div”,{style:“margin-top:8px;font-size:13px;color:”+C.mute+”;font-style:italic”,text:’”’+rec.note+’”’}));
+c.appendChild(rc);
+});
+}
+
+function renderChart(c){
+var tabs=el(“div”,{style:“display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px”});
+FIELDS.forEach(function(f){
+var active=state.selField===f.key;
+var b=el(“button”,{style:“padding:6px 11px;border:1px solid “+(active?f.color:C.br1)+”;border-radius:20px;cursor:pointer;font-family:inherit;font-size:11px;background:”+(active?f.color+“22”:C.bg1)+”;color:”+(active?f.color:C.mute),text:f.icon+” “+f.label});
+b.onclick=(function(k){return function(){state.selField=k;render();};})(f.key);
+tabs.appendChild(b);
+}); c.appendChild(tabs);
+var fi=FIELDS.filter(function(f){return f.key===state.selField;})[0]||FIELDS[0];
+var cData=state.records.filter(function(r){return r[state.selField]!=null;}).slice(0,10).reverse();
+if(!cData.length){
+var e=el(“div”,{style:“text-align:center;padding:60px 0;color:”+C.mute});
+e.appendChild(el(“div”,{style:“font-size:48px”,text:“📊”}));
+e.appendChild(el(“div”,{text:“ยังไม่มีข้อมูล”})); c.appendChild(e); return;
+}
+var cMax=Math.max.apply(null,cData.map(function(r){return r[state.selField];}))+2;
+var cMin=Math.max(0,Math.min.apply(null,cData.map(function(r){return r[state.selField];}))-2);
+var last=cData[cData.length-1];
+var box=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:16px;padding:18px 16px”});
+box.appendChild(el(“div”,{style:“font-size:12px;color:”+C.sub+”;margin-bottom:4px”,text:fi.label+” — ล่าสุด”}));
+var vh=el(“div”,{style:“display:flex;align-items:baseline;gap:10px;flex-wrap:wrap”});
+vh.appendChild(el(“div”,{style:“font-size:28px;font-weight:700;color:”+fi.color,text:last[state.selField]+’”’}));
+vh.appendChild(el(“div”,{style:“font-size:15px;color:”+C.mute,text:”= “+toCm(last[state.selField])+” ซม.”}));
+if(cData.length>1){var diff=Math.round((last[state.selField]-cData[0][state.selField])*100)/100;vh.appendChild(el(“span”,{style:“font-size:13px;color:”+(diff<=0?”#a8d8b0”:”#f4a7b9”),text:(diff>0?“▲”:“▼”)+” “+Math.abs(diff)+’”’}));}
+box.appendChild(vh);
+var svgW=Math.max(cData.length,1)*52;
+var svg=document.createElementNS(“http://www.w3.org/2000/svg”,“svg”);
+svg.setAttribute(“width”,“100%”);svg.setAttribute(“height”,“120”);svg.setAttribute(“viewBox”,“0 0 “+svgW+” 120”);svg.style.marginTop=“14px”;svg.style.overflow=“visible”;
+cData.forEach(function(r,i){
+var x=i*52+26,y=95-((r[state.selField]-cMin)/Math.max(cMax-cMin,0.1))*80;
+var next=cData[i+1];
+if(next){var nx=(i+1)*52+26,ny=95-((next[state.selField]-cMin)/Math.max(cMax-cMin,0.1))*80;var line=document.createElementNS(“http://www.w3.org/2000/svg”,“line”);line.setAttribute(“x1”,x);line.setAttribute(“y1”,y);line.setAttribute(“x2”,nx);line.setAttribute(“y2”,ny);line.setAttribute(“stroke”,fi.color);line.setAttribute(“stroke-width”,“2”);line.setAttribute(“stroke-opacity”,“0.8”);svg.appendChild(line);}
+var circle=document.createElementNS(“http://www.w3.org/2000/svg”,“circle”);circle.setAttribute(“cx”,x);circle.setAttribute(“cy”,y);circle.setAttribute(“r”,“5”);circle.setAttribute(“fill”,fi.color);svg.appendChild(circle);
+var t1=document.createElementNS(“http://www.w3.org/2000/svg”,“text”);t1.setAttribute(“x”,x);t1.setAttribute(“y”,“114”);t1.setAttribute(“text-anchor”,“middle”);t1.setAttribute(“font-size”,“9”);t1.setAttribute(“fill”,”#7a5570”);t1.textContent=fmtDate(r.date).slice(0,5);svg.appendChild(t1);
+var t2=document.createElementNS(“http://www.w3.org/2000/svg”,“text”);t2.setAttribute(“x”,x);t2.setAttribute(“y”,y-9);t2.setAttribute(“text-anchor”,“middle”);t2.setAttribute(“font-size”,“9”);t2.setAttribute(“fill”,fi.color);t2.textContent=r[state.selField]+’”’;svg.appendChild(t2);
+});
+box.appendChild(svg); c.appendChild(box);
+var maxV=Math.max.apply(null,cData.map(function(r){return r[state.selField];}));
+var minV=Math.min.apply(null,cData.map(function(r){return r[state.selField];}));
+var stats=el(“div”,{style:“display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px”});
+[{l:“สูงสุด”,v:maxV},{l:“ต่ำสุด”,v:minV}].forEach(function(s){
+var sc=el(“div”,{style:“background:”+C.bg1+”;border:1px solid “+C.br1+”;border-radius:12px;padding:12px 14px”});
+sc.appendChild(el(“div”,{style:“font-size:11px;color:”+C.mute+”;margin-bottom:4px”,text:s.l}));
+sc.appendChild(el(“div”,{style:“font-size:20px;font-weight:700;color:”+fi.color,text:s.v+’”’}));
+sc.appendChild(el(“div”,{style:“font-size:11px;color:”+C.faint,text:toCm(s.v)+” ซม.”}));
+stats.appendChild(sc);
+}); c.appendChild(stats);
+}
+
 render();
-} catch(e) {
-document.getElementById(“app”).innerHTML = ’<div style="padding:40px;color:#e57373;font-size:14px">Error: ’ + e.message + ‘</div>’;
-}
 </script>
 
 </body>
